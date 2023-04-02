@@ -15,7 +15,6 @@ import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import net.fabricmc.loader.impl.util.log.Log;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -199,13 +198,15 @@ final class Spindle {
         }
 
         @Override
-        public byte[] getClassByteArray(String name, boolean runTransformers) throws IOException {
-            return new byte[0];
+        public byte[] getClassByteArray(String name, boolean runTransformers) {
+            // only used by MixinServiceKnot as of 0.14.19
+            throw new UnsupportedOperationException("getClassByteArray");
         }
 
         @Override
         public Manifest getManifest(Path originPath) {
-            return null;
+            // not used at all as of 0.14.19
+            throw new UnsupportedOperationException("getManifest");
         }
 
         @Override
