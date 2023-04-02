@@ -131,7 +131,6 @@ final class Spindle {
     }
 
     private final class Launcher extends FabricLauncherBase {
-
         @Override
         public void addToClassPath(Path path, String... allowedPrefixes) {
             classManager.addCodeSource(path);
