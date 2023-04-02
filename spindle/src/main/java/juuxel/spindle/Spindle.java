@@ -189,12 +189,12 @@ final class Spindle {
 
         @Override
         public String getEntrypoint() {
-            return null;
+            return gameProvider.getEntrypoint();
         }
 
         @Override
         public String getTargetNamespace() {
-            return null;
+            return isDevelopment() ? "named" : "intermediary";
         }
 
         @Override
