@@ -20,7 +20,7 @@ public final class SpindleTransformationService implements ITransformationServic
 
     @Override
     public void initialize(IEnvironment environment) {
-        spindle = new Spindle();
+        spindle = Spindle.INSTANCE;
         spindle.init(environment);
     }
 
@@ -38,7 +38,7 @@ public final class SpindleTransformationService implements ITransformationServic
     @SuppressWarnings("rawtypes")
     @Override
     public @NotNull List<ITransformer> transformers() {
-        return null;
+        return List.of();
     }
 
 //    @Override

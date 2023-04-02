@@ -3,6 +3,9 @@ package juuxel.spindle;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import cpw.mods.modlauncher.api.ITransformationService;
+import cpw.mods.modlauncher.api.ITransformer;
+import cpw.mods.modlauncher.api.ITransformerVotingContext;
+import cpw.mods.modlauncher.api.TransformerVoteResult;
 import juuxel.spindle.util.LogCategories;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
@@ -13,7 +16,9 @@ import net.fabricmc.loader.impl.game.GameProvider;
 import net.fabricmc.loader.impl.launch.FabricLauncher;
 import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import net.fabricmc.loader.impl.util.log.Log;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.tree.ClassNode;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,15 +28,21 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.jar.Manifest;
 
 final class Spindle {
+    static final Spindle INSTANCE = new Spindle();
+
     private final FabricLauncher launcher = new Launcher();
     private final SpindleModClassManager classManager = new SpindleModClassManager();
     private EnvType envType;
     private GameProvider gameProvider;
     private FabricLoaderImpl loader;
     private @Nullable ModuleClasspath moduleClasspath;
+
+    private Spindle() {
+    }
 
     private static String getSpindleVersion() {
         return Spindle.class.getModule()
@@ -56,9 +67,6 @@ final class Spindle {
             gameProvider.getRawGameVersion(),
             FabricLoaderImpl.VERSION,
             getSpindleVersion());
-        gameProvider.initialize(launcher);
-        loader = FabricLoaderImpl.INSTANCE;
-        loader.setGameProvider(gameProvider);
     }
 
     void createGameModuleClasspath(IModuleLayerManager layerManager) {
@@ -67,6 +75,13 @@ final class Spindle {
     }
 
     ITransformationService.Resource loadMods() {
+        // 1. Set up game provider
+        // Note: MinecraftGameProvider.initialize requires
+        gameProvider.initialize(launcher);
+        loader = FabricLoaderImpl.INSTANCE;
+        loader.setGameProvider(gameProvider);
+
+        // 2. Load mods
         loader.load();
         loader.freeze();
         loader.loadAccessWideners();
@@ -75,13 +90,34 @@ final class Spindle {
 
         gameProvider.unlockClassPath(launcher);
 
+        // 3. Execute preLaunch
         try {
             EntrypointUtils.invoke("preLaunch", PreLaunchEntrypoint.class, PreLaunchEntrypoint::onPreLaunch);
         } catch (Exception e) {
             throw FormattedException.ofLocalized("exception.initializerFailure", e);
         }
 
+        // 4. Build resource from mod and classpath jars
         return new ITransformationService.Resource(IModuleLayerManager.Layer.GAME, classManager.getCodeSources());
+    }
+
+    ITransformer<?> createTransformer() {
+        return new ITransformer<ClassNode>() {
+            @Override
+            public @NotNull ClassNode transform(ClassNode input, ITransformerVotingContext context) {
+                return null;
+            }
+
+            @Override
+            public @NotNull TransformerVoteResult castVote(ITransformerVotingContext context) {
+                return TransformerVoteResult.YES;
+            }
+
+            @Override
+            public @NotNull Set<Target> targets() {
+                return Set.of(Target.targetClass());
+            }
+        };
     }
 
     private static EnvType determineEnvType() {
@@ -130,6 +166,21 @@ final class Spindle {
         throw new RuntimeException(error.toString());
     }
 
+    public GameProvider getGameProvider() {
+        GameProvider provider = gameProvider;
+        if (provider == null) throw new IllegalStateException("Game provider not available");
+        return provider;
+    }
+
+    public boolean isDevelopment() {
+        // TODO: implement
+        throw new UnsupportedOperationException();
+    }
+
+    public EnvType getEnvType() {
+        return envType;
+    }
+
     private final class Launcher extends FabricLauncherBase {
         @Override
         public void addToClassPath(Path path, String... allowedPrefixes) {
@@ -149,7 +200,7 @@ final class Spindle {
 
         @Override
         public EnvType getEnvironmentType() {
-            return envType;
+            return getEnvType();
         }
 
         @Override
@@ -184,12 +235,12 @@ final class Spindle {
 
         @Override
         public boolean isDevelopment() {
-            return false;
+            return Spindle.this.isDevelopment();
         }
 
         @Override
         public String getEntrypoint() {
-            return gameProvider.getEntrypoint();
+            return getGameProvider().getEntrypoint();
         }
 
         @Override
