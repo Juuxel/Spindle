@@ -3,9 +3,6 @@ package juuxel.spindle;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import cpw.mods.modlauncher.api.ITransformationService;
-import cpw.mods.modlauncher.api.ITransformer;
-import cpw.mods.modlauncher.api.ITransformerVotingContext;
-import cpw.mods.modlauncher.api.TransformerVoteResult;
 import juuxel.spindle.util.LogCategories;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
@@ -16,9 +13,7 @@ import net.fabricmc.loader.impl.game.GameProvider;
 import net.fabricmc.loader.impl.launch.FabricLauncher;
 import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import net.fabricmc.loader.impl.util.log.Log;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.tree.ClassNode;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.ServiceLoader;
-import java.util.Set;
 import java.util.jar.Manifest;
 
 final class Spindle {
@@ -99,25 +93,6 @@ final class Spindle {
 
         // 4. Build resource from mod and classpath jars
         return new ITransformationService.Resource(IModuleLayerManager.Layer.GAME, classManager.getCodeSources());
-    }
-
-    ITransformer<?> createTransformer() {
-        return new ITransformer<ClassNode>() {
-            @Override
-            public @NotNull ClassNode transform(ClassNode input, ITransformerVotingContext context) {
-                return null;
-            }
-
-            @Override
-            public @NotNull TransformerVoteResult castVote(ITransformerVotingContext context) {
-                return TransformerVoteResult.YES;
-            }
-
-            @Override
-            public @NotNull Set<Target> targets() {
-                return Set.of(Target.targetClass());
-            }
-        };
     }
 
     private static EnvType determineEnvType() {
