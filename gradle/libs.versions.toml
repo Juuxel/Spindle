@@ -1,0 +1,14 @@
+[versions]
+modlauncher = "10.0.8"
+securejarhandler = "2.1.6"
+fabric-loader = "0.14.19"
+jetbrains-annotations = "24.0.1"
+
+[libraries]
+modlauncher = { module = "cpw.mods:modlauncher", version.ref = "modlauncher" }
+securejarhandler = { module = "cpw.mods:securejarhandler", version.ref = "securejarhandler" }
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
+
+[bundles]
+forge-environment = ["modlauncher", "securejarhandler"]

@@ -1,0 +1,58 @@
+plugins {
+    id("org.gradlex.extra-java-module-info")
+}
+
+configurations {
+    fabricLoader {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+
+    fabricLoaderDependencies {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+
+    implementation {
+        extendsFrom fabricLoader
+    }
+
+    compileClasspath {
+        extendsFrom fabricLoaderDependencies
+    }
+}
+
+dependencies {
+    implementation libs.bundles.forge.environment
+    fabricLoader libs.fabric.loader
+    compileOnly libs.jetbrains.annotations
+
+    compileOnly 'net.minecraftforge:fmlloader:1.19.4-45.0.40'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+extraJavaModuleInfo {
+    failOnMissingModuleInfo = false
+    automaticModule("net.fabricmc:fabric-loader", "net.fabricmc.fabricloader")
+}
+
+import groovy.json.JsonSlurper
+
+afterEvaluate {
+    def loaderJar = configurations.fabricLoader.singleFile
+    def installerJsonFile = zipTree(loaderJar).matching {
+        include 'fabric-installer.json'
+    }.singleFile
+    def installerJson = new JsonSlurper().parse(installerJsonFile)
+    for (def library : installerJson.libraries.common) {
+        dependencies {
+            fabricLoaderDependencies library.name
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

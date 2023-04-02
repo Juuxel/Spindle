@@ -1,0 +1,33 @@
+plugins {
+    id("org.gradlex.extra-java-module-info") version "1.3" apply false
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    group 'io.github.juuxel'
+    version '1.0-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net'
+        }
+        maven {
+            name = 'Forge'
+            url = 'https://maven.minecraftforge.net'
+        }
+        maven { url 'https://libraries.minecraft.net' }
+    }
+
+    compileJava {
+        options.javaModuleVersion = project.version
+    }
+}
+
