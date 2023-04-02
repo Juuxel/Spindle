@@ -63,4 +63,14 @@ final class ModuleClasspath {
     boolean isClassLoaded(String name) {
         return classLoader.findLoadedClassExt(name) != null;
     }
+
+    Class<?> loadIntoTarget(String name) throws ClassNotFoundException {
+        Class<?> c = classLoader.findLoadedClassExt(name);
+
+        if (c == null) {
+            c = classLoader.loadClass(name, true);
+        }
+
+        return c;
+    }
 }

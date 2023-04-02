@@ -159,7 +159,7 @@ final class Spindle {
 
         @Override
         public Class<?> loadIntoTarget(String name) throws ClassNotFoundException {
-            return null;
+            return moduleClasspath().loadIntoTarget(name);
         }
 
         @Override

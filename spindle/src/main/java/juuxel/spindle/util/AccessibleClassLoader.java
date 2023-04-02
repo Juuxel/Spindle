@@ -11,6 +11,11 @@ public final class AccessibleClassLoader extends ClassLoader {
         return findLoadedClass(name);
     }
 
+    @Override
+    public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        return super.loadClass(name, resolve);
+    }
+
     static {
         registerAsParallelCapable();
     }
