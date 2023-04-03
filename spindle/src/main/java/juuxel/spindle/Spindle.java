@@ -139,7 +139,7 @@ final class Spindle {
         StringBuilder error = new StringBuilder("Could not find game provider. ");
 
         if (badProviders.isEmpty()) {
-            error.append("There were enabled game providers.");
+            error.append("There were no enabled game providers.");
         } else {
             error.append("I tried these game providers:");
 
