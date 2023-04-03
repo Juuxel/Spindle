@@ -58,10 +58,10 @@ final class Spindle {
 
     void init(IEnvironment environment) {
         // Set up Spindle
-        moduleClasspath = environment.findModuleLayerManager()
-            .flatMap(manager -> ModuleClasspath.find(manager,
-                IModuleLayerManager.Layer.SERVICE, IModuleLayerManager.Layer.BOOT))
-            .orElse(null);
+//        moduleClasspath = environment.findModuleLayerManager()
+//            .flatMap(manager -> ModuleClasspath.find(manager,
+//                IModuleLayerManager.Layer.SERVICE, IModuleLayerManager.Layer.BOOT))
+//            .orElse(null);
 
         // Set up Loader
         envType = determineEnvType();
