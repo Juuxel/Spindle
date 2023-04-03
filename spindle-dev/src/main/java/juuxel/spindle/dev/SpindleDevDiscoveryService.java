@@ -12,9 +12,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -29,28 +31,36 @@ public final class SpindleDevDiscoveryService implements ITransformerDiscoverySe
         for (String cpEntry : classpath) {
             Path path = Path.of(cpEntry);
 
-            try (ZipFile zip = new ZipFile(path.toFile())) {
-                ZipEntry installerEntry = zip.getEntry("fabric-installer.json");
-                if (installerEntry != null) {
+            if (Files.isDirectory(path)) {
+                Path installerPath = path.resolve("fabric-installer.json");
+                if (Files.exists(installerPath)) {
                     result.add(new NamedPath("fabricloader", path));
 
-                    try (Reader r = new InputStreamReader(zip.getInputStream(installerEntry))) {
-                        JsonObject json = new Gson().fromJson(r, JsonObject.class);
-                        JsonArray commonLibraries = json.getAsJsonObject("libraries")
-                            .getAsJsonArray("common");
-
-                        for (JsonElement library : commonLibraries) {
-                            String name = library.getAsJsonObject()
-                                .getAsJsonPrimitive("name")
-                                .getAsString();
-                            libraries.add(name);
-                        }
+                    try (Reader r = Files.newBufferedReader(installerPath)) {
+                        collectLibraries(r, libraries::add);
                     } catch (IOException e) {
-                        throw new UncheckedIOException("Could not read fabric-installer.json", e);
+                        throw new UncheckedIOException(e);
                     }
+
+                    break;
                 }
-            } catch (IOException e) {
-                throw new UncheckedIOException("Could not access jar", e);
+            } else {
+                try (ZipFile zip = new ZipFile(path.toFile())) {
+                    ZipEntry installerEntry = zip.getEntry("fabric-installer.json");
+                    if (installerEntry != null) {
+                        result.add(new NamedPath("fabricloader", path));
+
+                        try (Reader r = new InputStreamReader(zip.getInputStream(installerEntry))) {
+                            collectLibraries(r, libraries::add);
+                        } catch (IOException e) {
+                            throw new UncheckedIOException("Could not read fabric-installer.json", e);
+                        }
+
+                        break;
+                    }
+                } catch (IOException e) {
+                    throw new UncheckedIOException("Could not access jar", e);
+                }
             }
         }
 
@@ -84,5 +94,18 @@ public final class SpindleDevDiscoveryService implements ITransformerDiscoverySe
 
         result.add(new NamedPath("fabricloaderdependencies", libraryPaths.toArray(Path[]::new)));
         return result;
+    }
+
+    private static void collectLibraries(Reader r, Consumer<String> collector) throws IOException {
+        JsonObject json = new Gson().fromJson(r, JsonObject.class);
+        JsonArray commonLibraries = json.getAsJsonObject("libraries")
+            .getAsJsonArray("common");
+
+        for (JsonElement library : commonLibraries) {
+            String name = library.getAsJsonObject()
+                .getAsJsonPrimitive("name")
+                .getAsString();
+            collector.accept(name);
+        }
     }
 }
