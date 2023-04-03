@@ -35,6 +35,7 @@ final class Spindle {
     private GameProvider gameProvider;
     private FabricLoaderImpl loader;
     private @Nullable ModuleClasspath moduleClasspath;
+    private boolean isDevelopment;
     private final List<Path> launcherClasspath = new ArrayList<>();
 
     private Spindle() {
@@ -63,6 +64,8 @@ final class Spindle {
             gameProvider.getRawGameVersion(),
             FabricLoaderImpl.VERSION,
             getSpindleVersion());
+
+        isDevelopment = Boolean.getBoolean("fabric.development");
 
         // Set up classpath for FabricLauncher.getClassPath
         for (String entry : System.getProperty("java.class.path").split(File.pathSeparator)) {
@@ -155,8 +158,7 @@ final class Spindle {
     }
 
     public boolean isDevelopment() {
-        // TODO: implement
-        throw new UnsupportedOperationException();
+        return isDevelopment;
     }
 
     public EnvType getEnvType() {
