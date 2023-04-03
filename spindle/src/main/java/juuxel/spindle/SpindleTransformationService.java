@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.Set;
 
 public final class SpindleTransformationService implements ITransformationService {
+    static {
+        Spindle.INSTANCE.preInit();
+    }
+
     private Spindle spindle;
 
     @Override

@@ -53,6 +53,9 @@ final class Spindle {
             .orElse("[unknown version]");
     }
 
+    void preInit() {
+    }
+
     void init(IEnvironment environment) {
         // Set up Spindle
         moduleClasspath = environment.findModuleLayerManager()
