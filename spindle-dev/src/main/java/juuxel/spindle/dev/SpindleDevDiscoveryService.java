@@ -9,16 +9,14 @@ import cpw.mods.modlauncher.serviceapi.ITransformerDiscoveryService;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
-import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public final class SpindleDevDiscoveryService implements ITransformerDiscoveryService {
     @Override
@@ -30,14 +28,13 @@ public final class SpindleDevDiscoveryService implements ITransformerDiscoverySe
         List<String> libraries = new ArrayList<>();
         for (String cpEntry : classpath) {
             Path path = Path.of(cpEntry);
-            URI jarUri = URI.create("jar:" + path.toUri());
 
-            try (FileSystem fs = FileSystems.newFileSystem(jarUri, Map.of("create", false))) {
-                Path installerPath = fs.getPath("fabric-installer.json");
-                if (Files.exists(installerPath)) {
+            try (ZipFile zip = new ZipFile(path.toFile())) {
+                ZipEntry installerEntry = zip.getEntry("fabric-installer.json");
+                if (installerEntry != null) {
                     result.add(new NamedPath("fabricloader", path));
 
-                    try (Reader r = Files.newBufferedReader(installerPath)) {
+                    try (Reader r = new InputStreamReader(zip.getInputStream(installerEntry))) {
                         JsonObject json = new Gson().fromJson(r, JsonObject.class);
                         JsonArray commonLibraries = json.getAsJsonObject("libraries")
                             .getAsJsonArray("common");
