@@ -1,11 +1,10 @@
 package juuxel.spindle;
 
-import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.TypesafeMap;
-import juuxel.spindle.util.LogCategories;
+import juuxel.spindle.util.Logging;
 import juuxel.spindle.util.TypesafeMapWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
@@ -73,7 +72,7 @@ final class Spindle {
         envType = determineEnvType();
         gameProvider = determineGameProvider();
         Log.finishBuiltinConfig();
-        Log.info(LogCategories.GENERAL, "Loading %s %s with Fabric Loader %s via Spindle %s",
+        Logging.LOGGER.info("Loading {} {} with Fabric Loader {} via Spindle {}",
             gameProvider.getGameName(),
             gameProvider.getRawGameVersion(),
             FabricLoaderImpl.VERSION,
@@ -162,7 +161,7 @@ final class Spindle {
             }
         }
 
-        Log.error(LogCategories.LOADING, error.toString());
+        Logging.LOGGER.error(Logging.LOADING, error.toString());
         throw new RuntimeException(error.toString());
     }
 

@@ -2,8 +2,7 @@ package juuxel.spindle;
 
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import juuxel.spindle.util.AccessibleClassLoader;
-import juuxel.spindle.util.LogCategories;
-import net.fabricmc.loader.impl.util.log.Log;
+import juuxel.spindle.util.Logging;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,8 +25,8 @@ final class ModuleClasspath {
         if (cls.isEmpty()) {
             throw new IllegalArgumentException("Module layer " + type.name() + " has no modules!");
         } else if (cls.size() > 1) {
-            Log.error(LogCategories.MODULES,
-                "Module layer %s has more than one class loader: %s; choosing first one",
+            Logging.LOGGER.error(Logging.MODULES,
+                "Module layer {} has more than one class loader: {}; choosing first one",
                 type, cls);
         }
 
@@ -48,7 +47,7 @@ final class ModuleClasspath {
         }
 
         if (layer == null) {
-            Log.warn(LogCategories.MODULES,
+            Logging.LOGGER.warn(Logging.MODULES,
                 "Could not find any module layer from alternatives " + Arrays.toString(layers));
             return Optional.empty();
         }

@@ -25,6 +25,7 @@ configurations {
 dependencies {
     implementation libs.bundles.forge.environment
     implementation libs.joptsimple
+    implementation libs.log4j.api
     fabricLoader libs.fabric.loader
     compileOnly libs.jetbrains.annotations
 
