@@ -1,7 +1,3 @@
-plugins {
-    id("org.gradlex.extra-java-module-info")
-}
-
 configurations {
     fabricLoader {
         canBeResolved = true
@@ -33,9 +29,10 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
-extraJavaModuleInfo {
-    failOnMissingModuleInfo = false
-    automaticModule("net.fabricmc:fabric-loader", "net.fabricmc.fabricloader")
+jar {
+    manifest {
+        attributes 'Automatic-Module-Name': 'io.github.juuxel.spindle'
+    }
 }
 
 import groovy.json.JsonSlurper
