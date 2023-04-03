@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.fabricmc.loader.impl.FormattedException;
+import net.fabricmc.loader.impl.ModContainerImpl;
 import net.fabricmc.loader.impl.entrypoint.EntrypointUtils;
 import net.fabricmc.loader.impl.game.GameProvider;
 import net.fabricmc.loader.impl.launch.FabricLauncher;
@@ -15,6 +16,7 @@ import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import net.fabricmc.loader.impl.util.LoaderUtil;
 import net.fabricmc.loader.impl.util.log.Log;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Mixins;
 
 import java.io.File;
 import java.io.InputStream;
@@ -90,18 +92,21 @@ final class Spindle {
         loader.freeze();
         loader.loadAccessWideners();
 
-        // TODO: init mixin
+        // 3. Initialise mixin
+        initMixin();
 
+        // 4. Unlock game provider classpath (really, this doesn't do much for us
+        // but Knot does it, so let's follow the logic)
         gameProvider.unlockClassPath(launcher);
 
-        // 3. Execute preLaunch
+        // 5. Execute preLaunch
         try {
             EntrypointUtils.invoke("preLaunch", PreLaunchEntrypoint.class, PreLaunchEntrypoint::onPreLaunch);
         } catch (Exception e) {
             throw FormattedException.ofLocalized("exception.initializerFailure", e);
         }
 
-        // 4. Build resource from mod and classpath jars
+        // 6. Build resource from mod and classpath jars
         return new ITransformationService.Resource(IModuleLayerManager.Layer.GAME, classManager.getCodeSources());
     }
 
@@ -149,6 +154,23 @@ final class Spindle {
 
         Log.error(LogCategories.LOADING, error.toString());
         throw new RuntimeException(error.toString());
+    }
+
+    private void initMixin() {
+        // TODO: Set up dev remapping?
+        for (ModContainerImpl mod : loader.getModsInternal()) {
+            for (String config : mod.getMetadata().getMixinConfigs(envType)) {
+                try {
+                    Mixins.addConfiguration(config);
+                } catch (Exception e) {
+                    throw new RuntimeException(
+                        "Could not add mixin config %s from mod %s"
+                            .formatted(config, mod.getMetadata().getId()),
+                        e
+                    );
+                }
+            }
+        }
     }
 
     public GameProvider getGameProvider() {
