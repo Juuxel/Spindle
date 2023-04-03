@@ -1,3 +1,7 @@
+plugins {
+    id 'java-library'
+}
+
 configurations {
     fabricLoader {
         canBeResolved = true
@@ -9,7 +13,7 @@ configurations {
         canBeConsumed = false
     }
 
-    implementation {
+    api {
         extendsFrom fabricLoader
     }
 
@@ -52,4 +56,28 @@ afterEvaluate {
 
 test {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        mavenWithFabricDeps(MavenPublication) {
+            artifactId = 'spindle-with-fabric-deps'
+
+            pom.withXml {
+                def depsNode = asNode().appendNode('dependencies')
+                def addDep = { group, artifact, version, scope ->
+                    def dep = depsNode.appendNode('dependency')
+                    dep.appendNode('groupId', group)
+                    dep.appendNode('artifactId', artifact)
+                    dep.appendNode('version', version)
+                    dep.appendNode('scope', scope)
+                }
+
+                addDep project.group, publications.maven.artifactId, project.version, 'compile'
+                for (def dep : configurations.fabricLoaderDependencies.allDependencies) {
+                    addDep dep.group, dep.name, dep.version, 'runtime'
+                }
+            }
+        }
+    }
 }

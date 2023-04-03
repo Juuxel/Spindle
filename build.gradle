@@ -1,5 +1,6 @@
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'maven-publish'
 
     java {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -24,6 +25,14 @@ subprojects {
 
     compileJava {
         options.javaModuleVersion = project.version
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from components.java
+            }
+        }
     }
 }
 
