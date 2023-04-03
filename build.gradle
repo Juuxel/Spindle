@@ -27,6 +27,11 @@ subprojects {
         options.javaModuleVersion = project.version
     }
 
+    jar {
+        reproducibleFileOrder = true
+        preserveFileTimestamps = false
+    }
+
     publishing {
         publications {
             maven(MavenPublication) {
