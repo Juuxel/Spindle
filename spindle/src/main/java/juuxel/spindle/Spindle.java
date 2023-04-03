@@ -64,6 +64,11 @@ final class Spindle {
 //                IModuleLayerManager.Layer.SERVICE, IModuleLayerManager.Layer.BOOT))
 //            .orElse(null);
 
+        // Set up classpath for FabricLauncher.getClassPath
+        for (String entry : System.getProperty("java.class.path").split(File.pathSeparator)) {
+            launcherClasspath.add(LoaderUtil.normalizePath(Path.of(entry)));
+        }
+
         // Set up Loader
         envType = determineEnvType();
         gameProvider = determineGameProvider();
@@ -75,11 +80,6 @@ final class Spindle {
             getSpindleVersion());
 
         isDevelopment = Boolean.getBoolean("fabric.development");
-
-        // Set up classpath for FabricLauncher.getClassPath
-        for (String entry : System.getProperty("java.class.path").split(File.pathSeparator)) {
-            launcherClasspath.add(LoaderUtil.normalizePath(Path.of(entry)));
-        }
     }
 
     void setArgs(String[] args) {
