@@ -12,9 +12,11 @@ import net.fabricmc.loader.impl.entrypoint.EntrypointUtils;
 import net.fabricmc.loader.impl.game.GameProvider;
 import net.fabricmc.loader.impl.launch.FabricLauncher;
 import net.fabricmc.loader.impl.launch.FabricLauncherBase;
+import net.fabricmc.loader.impl.util.LoaderUtil;
 import net.fabricmc.loader.impl.util.log.Log;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ final class Spindle {
     private GameProvider gameProvider;
     private FabricLoaderImpl loader;
     private @Nullable ModuleClasspath moduleClasspath;
+    private final List<Path> launcherClasspath = new ArrayList<>();
 
     private Spindle() {
     }
@@ -60,6 +63,11 @@ final class Spindle {
             gameProvider.getRawGameVersion(),
             FabricLoaderImpl.VERSION,
             getSpindleVersion());
+
+        // Set up classpath for FabricLauncher.getClassPath
+        for (String entry : System.getProperty("java.class.path").split(File.pathSeparator)) {
+            launcherClasspath.add(LoaderUtil.normalizePath(Path.of(entry)));
+        }
     }
 
     void createGameModuleClasspath(IModuleLayerManager layerManager) {
@@ -226,7 +234,7 @@ final class Spindle {
 
         @Override
         public List<Path> getClassPath() {
-            return null;
+            return launcherClasspath;
         }
 
         private ModuleClasspath moduleClasspath() {
