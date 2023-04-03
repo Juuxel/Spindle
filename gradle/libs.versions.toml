@@ -4,6 +4,7 @@ securejarhandler = "2.1.6"
 fabric-loader = "0.14.19"
 jetbrains-annotations = "24.0.1"
 gson = "2.10.1"
+joptsimple = "5.0.4"
 
 [libraries]
 modlauncher = { module = "cpw.mods:modlauncher", version.ref = "modlauncher" }
@@ -11,6 +12,7 @@ securejarhandler = { module = "cpw.mods:securejarhandler", version.ref = "secure
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+joptsimple = { module = "net.sf.jopt-simple:jopt-simple", version.ref = "joptsimple" }
 
 [bundles]
 forge-environment = ["modlauncher", "securejarhandler"]

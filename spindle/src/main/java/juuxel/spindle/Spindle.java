@@ -42,6 +42,7 @@ final class Spindle {
     private @Nullable ModuleClasspath moduleClasspath;
     private boolean isDevelopment;
     private final List<Path> launcherClasspath = new ArrayList<>();
+    private String[] args;
 
     private Spindle() {
     }
@@ -79,6 +80,10 @@ final class Spindle {
         for (String entry : System.getProperty("java.class.path").split(File.pathSeparator)) {
             launcherClasspath.add(LoaderUtil.normalizePath(Path.of(entry)));
         }
+    }
+
+    void setArgs(String[] args) {
+        this.args = args;
     }
 
     void createGameModuleClasspath(IModuleLayerManager layerManager) {
@@ -133,8 +138,7 @@ final class Spindle {
         for (GameProvider provider : ServiceLoader.load(GameProvider.class)) {
             if (!provider.isEnabled()) continue;
 
-            // TODO: args
-            if (provider.locateGame(launcher, null)) {
+            if (provider.locateGame(launcher, args)) {
                 return provider;
             } else {
                 badProviders.add(provider);
