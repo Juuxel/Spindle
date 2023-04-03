@@ -1,3 +1,2 @@
 include 'spindle'
 include 'spindle-bootstrap'
-include 'spindle-dev'

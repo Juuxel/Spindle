@@ -1,4 +1,0 @@
-dependencies {
-    implementation libs.bundles.forge.environment
-    implementation libs.gson
-}
