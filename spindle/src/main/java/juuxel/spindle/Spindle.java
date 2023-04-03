@@ -1,9 +1,12 @@
 package juuxel.spindle;
 
+import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import cpw.mods.modlauncher.api.ITransformationService;
+import cpw.mods.modlauncher.api.TypesafeMap;
 import juuxel.spindle.util.LogCategories;
+import juuxel.spindle.util.TypesafeMapWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
@@ -188,6 +191,11 @@ final class Spindle {
     }
 
     private final class Launcher extends FabricLauncherBase {
+        Launcher() {
+            TypesafeMap blackboard = cpw.mods.modlauncher.Launcher.INSTANCE.blackboard();
+            setProperties(new TypesafeMapWrapper(blackboard));
+        }
+
         @Override
         public void addToClassPath(Path path, String... allowedPrefixes) {
             classManager.addCodeSource(path);
