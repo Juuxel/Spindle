@@ -1,4 +1,4 @@
-package juuxel.spindle;
+package juuxel.spindle.classpath;
 
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import juuxel.spindle.util.AccessibleClassLoader;
@@ -10,7 +10,7 @@ import java.util.IdentityHashMap;
 import java.util.Optional;
 import java.util.Set;
 
-final class ModuleClasspath {
+public final class ModuleClasspath implements Classpath {
     private final ModuleLayer layer;
     private final AccessibleClassLoader classLoader;
 
@@ -33,7 +33,17 @@ final class ModuleClasspath {
         classLoader = new AccessibleClassLoader("Spindle/" + type.name(), cls.iterator().next());
     }
 
-    static Optional<ModuleClasspath> find(IModuleLayerManager layerManager, IModuleLayerManager.Layer... layers) {
+    public static Optional<ModuleClasspath> find(IModuleLayerManager layerManager, IModuleLayerManager.Layer... layers) {
+        try {
+            return Optional.of(findThrowing(layerManager, layers));
+        } catch (ClasspathCreationException e) {
+            Logging.LOGGER.warn(Logging.MODULES, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public static ModuleClasspath findThrowing(IModuleLayerManager layerManager, IModuleLayerManager.Layer... layers)
+        throws ClasspathCreationException {
         ModuleLayer layer = null;
         IModuleLayerManager.Layer type = null;
 
@@ -47,23 +57,24 @@ final class ModuleClasspath {
         }
 
         if (layer == null) {
-            Logging.LOGGER.warn(Logging.MODULES,
-                "Could not find any module layer from alternatives " + Arrays.toString(layers));
-            return Optional.empty();
+            throw new ClasspathCreationException("Could not find any module layer from alternatives " + Arrays.toString(layers));
         }
 
-        return Optional.of(new ModuleClasspath(layer, type));
+        return new ModuleClasspath(layer, type);
     }
 
-    ClassLoader getTargetClassLoader() {
+    @Override
+    public ClassLoader getTargetClassLoader() {
         return classLoader;
     }
 
-    boolean isClassLoaded(String name) {
+    @Override
+    public boolean isClassLoaded(String name) {
         return classLoader.findLoadedClassExt(name) != null;
     }
 
-    Class<?> loadIntoTarget(String name) throws ClassNotFoundException {
+    @Override
+    public Class<?> loadIntoTarget(String name) throws ClassNotFoundException {
         Class<?> c = classLoader.findLoadedClassExt(name);
 
         if (c == null) {

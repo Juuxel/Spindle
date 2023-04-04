@@ -4,6 +4,9 @@ import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.TypesafeMap;
+import juuxel.spindle.classpath.Classpath;
+import juuxel.spindle.classpath.LazyClasspath;
+import juuxel.spindle.classpath.ModuleClasspath;
 import juuxel.spindle.util.Logging;
 import juuxel.spindle.util.TypesafeMapWrapper;
 import net.fabricmc.api.EnvType;
@@ -38,7 +41,7 @@ final class Spindle {
     private EnvType envType;
     private GameProvider gameProvider;
     private FabricLoaderImpl loader;
-    private @Nullable ModuleClasspath moduleClasspath;
+    private @Nullable Classpath gameClasspath;
     private boolean isDevelopment;
     private final List<Path> launcherClasspath = new ArrayList<>();
     private String[] args;
@@ -86,8 +89,11 @@ final class Spindle {
     }
 
     void createGameModuleClasspath(IModuleLayerManager layerManager) {
-        moduleClasspath = ModuleClasspath.find(layerManager, IModuleLayerManager.Layer.GAME)
-            .orElseThrow(() -> new RuntimeException("Could not find GAME module layer!"));
+        gameClasspath = new LazyClasspath(
+            () -> ModuleClasspath.findThrowing(layerManager, IModuleLayerManager.Layer.GAME),
+            ModuleClasspath.find(layerManager, IModuleLayerManager.Layer.PLUGIN)
+                .orElseThrow(() -> new RuntimeException("Could not find PLUGIN module layer!"))
+        );
     }
 
     ITransformationService.Resource loadMods() {
@@ -225,12 +231,12 @@ final class Spindle {
 
         @Override
         public boolean isClassLoaded(String name) {
-            return moduleClasspath().isClassLoaded(name);
+            return gameClasspath().isClassLoaded(name);
         }
 
         @Override
         public Class<?> loadIntoTarget(String name) throws ClassNotFoundException {
-            return moduleClasspath().loadIntoTarget(name);
+            return gameClasspath().loadIntoTarget(name);
         }
 
         @Override
@@ -240,7 +246,7 @@ final class Spindle {
 
         @Override
         public ClassLoader getTargetClassLoader() {
-            return moduleClasspath().getTargetClassLoader();
+            return gameClasspath().getTargetClassLoader();
         }
 
         @Override
@@ -280,10 +286,10 @@ final class Spindle {
             return false;
         }
 
-        private ModuleClasspath moduleClasspath() {
-            ModuleClasspath mc = moduleClasspath;
-            if (mc == null) throw new IllegalStateException("Module classpath not available");
-            return mc;
+        private Classpath gameClasspath() {
+            Classpath cp = gameClasspath;
+            if (cp == null) throw new IllegalStateException("Game classpath not available");
+            return cp;
         }
     }
 }
