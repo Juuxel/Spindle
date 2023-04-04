@@ -110,8 +110,9 @@ final class Spindle {
         // but uses the system class loader for discovering mods.
         // We can follow suit by introducing a rather hacky class loader that
         // only reads resources from the system class loader.
-        launcher.targetClassLoader = new AdditionalResourcesClassLoader(launcher.getTargetClassLoader(),
+        ClassLoader discoveryClassLoader = new AdditionalResourcesClassLoader(launcher.getTargetClassLoader(),
             List.of(ClassLoader.getSystemClassLoader()));
+        launcher.targetClassLoader = discoveryClassLoader;
         loader.load();
         loader.freeze();
         loader.loadAccessWideners();
@@ -119,7 +120,14 @@ final class Spindle {
         launcher.targetClassLoader = null;
 
         // 3. Initialise mixin
-        initMixin();
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            // We need the hacky discovering class loader for loading mixin configs.
+            Thread.currentThread().setContextClassLoader(discoveryClassLoader);
+            initMixin();
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        }
 
         // 4. Unlock game provider classpath (really, this doesn't do much for us
         // but Knot does it, so let's follow the logic)
