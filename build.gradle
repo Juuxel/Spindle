@@ -1,6 +1,11 @@
+plugins {
+    id("net.kyori.indra.licenser.spotless") version "3.0.1" apply false
+}
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
+    apply plugin: 'net.kyori.indra.licenser.spotless'
 
     java {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -40,6 +45,11 @@ subprojects {
                 from components.java
             }
         }
+    }
+
+    indraSpotlessLicenser {
+        licenseHeaderFile(rootProject.file("HEADER.txt"))
+        newLine(true)
     }
 }
 
