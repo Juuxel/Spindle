@@ -10,7 +10,7 @@ subprojects {
     }
 
     group 'io.github.juuxel'
-    version '0.0.12'
+    version '0.0.13'
 
     repositories {
         mavenCentral()

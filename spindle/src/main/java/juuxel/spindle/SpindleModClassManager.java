@@ -52,6 +52,9 @@ final class SpindleModClassManager {
     }
 
     private boolean isAllowedToLoad(Path codeSource, String dottedResourceName) {
+        // The root path and any jar metadata are always allowed.
+        if (dottedResourceName.equals(".") || dottedResourceName.startsWith("META-INF.")) return true;
+
         String[] prefixes = allowedPrefixes.get(codeSource);
         if (prefixes == null) return true;
 
