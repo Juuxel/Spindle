@@ -275,6 +275,11 @@ final class Spindle {
             return launcherClasspath;
         }
 
+        @Override
+        public boolean useFabricMixinServices() {
+            return false;
+        }
+
         private ModuleClasspath moduleClasspath() {
             ModuleClasspath mc = moduleClasspath;
             if (mc == null) throw new IllegalStateException("Module classpath not available");

@@ -22,6 +22,10 @@ configurations {
     }
 }
 
+repositories {
+    mavenLocal()
+}
+
 dependencies {
     implementation libs.bundles.forge.environment
     implementation libs.joptsimple
