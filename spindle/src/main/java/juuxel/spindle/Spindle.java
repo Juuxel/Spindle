@@ -41,6 +41,7 @@ final class Spindle {
     private EnvType envType;
     private GameProvider gameProvider;
     private FabricLoaderImpl loader;
+    private Classpath pluginClasspath;
     private @Nullable Classpath gameClasspath;
     private boolean isDevelopment;
     private final List<Path> launcherClasspath = new ArrayList<>();
@@ -89,10 +90,11 @@ final class Spindle {
     }
 
     void createGameModuleClasspath(IModuleLayerManager layerManager) {
+        pluginClasspath = ModuleClasspath.find(layerManager, IModuleLayerManager.Layer.PLUGIN)
+            .orElseThrow(() -> new RuntimeException("Could not find PLUGIN module layer!"));
         gameClasspath = new LazyClasspath(
             () -> ModuleClasspath.findThrowing(layerManager, IModuleLayerManager.Layer.GAME),
-            ModuleClasspath.find(layerManager, IModuleLayerManager.Layer.PLUGIN)
-                .orElseThrow(() -> new RuntimeException("Could not find PLUGIN module layer!"))
+            pluginClasspath
         );
     }
 
@@ -123,7 +125,8 @@ final class Spindle {
         }
 
         // 6. Build resource from mod and classpath jars
-        return new ITransformationService.Resource(IModuleLayerManager.Layer.GAME, classManager.getCodeSources());
+        return new ITransformationService.Resource(IModuleLayerManager.Layer.GAME,
+            classManager.getCodeSources(pluginClasspath));
     }
 
     private static EnvType determineEnvType() {

@@ -1,6 +1,8 @@
 package juuxel.spindle.classpath;
 
+import java.net.URI;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public final class LazyClasspath implements Classpath {
     private Factory factory;
@@ -30,6 +32,11 @@ public final class LazyClasspath implements Classpath {
         }
 
         return result;
+    }
+
+    @Override
+    public Stream<URI> codeSources() {
+        return getEffective().codeSources();
     }
 
     @Override
