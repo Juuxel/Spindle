@@ -1,6 +1,7 @@
 package juuxel.spindle;
 
 import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
+import juuxel.spindle.util.ClassClearer;
 import net.fabricmc.loader.impl.transformer.FabricTransformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -62,8 +63,13 @@ public final class SpindleLaunchPlugin implements ILaunchPluginService {
     }
 
     private static void insertBytesIntoNode(ClassNode node, byte[] bytes) {
+        clearClassNode(node);
         ClassReader reader = new ClassReader(bytes);
         reader.accept(node, 0);
+    }
+
+    private static void clearClassNode(ClassNode node) {
+        ClassClearer.forClass(ClassNode.class).clear(node);
     }
 
     private static final class FindNameVisitor extends ClassVisitor {
