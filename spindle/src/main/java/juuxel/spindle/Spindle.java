@@ -7,6 +7,7 @@ import cpw.mods.modlauncher.api.TypesafeMap;
 import juuxel.spindle.classpath.Classpath;
 import juuxel.spindle.classpath.LazyClasspath;
 import juuxel.spindle.classpath.ModuleClasspath;
+import juuxel.spindle.util.AdditionalResourcesClassLoader;
 import juuxel.spindle.util.Logging;
 import juuxel.spindle.util.TypesafeMapWrapper;
 import net.fabricmc.api.EnvType;
@@ -16,7 +17,6 @@ import net.fabricmc.loader.impl.FormattedException;
 import net.fabricmc.loader.impl.ModContainerImpl;
 import net.fabricmc.loader.impl.entrypoint.EntrypointUtils;
 import net.fabricmc.loader.impl.game.GameProvider;
-import net.fabricmc.loader.impl.launch.FabricLauncher;
 import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import net.fabricmc.loader.impl.util.LoaderUtil;
 import net.fabricmc.loader.impl.util.log.Log;
@@ -36,7 +36,7 @@ import java.util.jar.Manifest;
 final class Spindle {
     static final Spindle INSTANCE = new Spindle();
 
-    private final FabricLauncher launcher = new Launcher();
+    private final Launcher launcher = new Launcher();
     private final SpindleModClassManager classManager = new SpindleModClassManager();
     private EnvType envType;
     private GameProvider gameProvider;
@@ -100,15 +100,23 @@ final class Spindle {
 
     ITransformationService.Resource loadMods() {
         // 1. Set up game provider
-        // Note: MinecraftGameProvider.initialize requires
         gameProvider.initialize(launcher);
         loader = FabricLoaderImpl.INSTANCE;
         loader.setGameProvider(gameProvider);
 
         // 2. Load mods
+
+        // Forge compat: FML isolates the class loaders for classloading,
+        // but uses the system class loader for discovering mods.
+        // We can follow suit by introducing a rather hacky class loader that
+        // only reads resources from the system class loader.
+        launcher.targetClassLoader = new AdditionalResourcesClassLoader(launcher.getTargetClassLoader(),
+            List.of(ClassLoader.getSystemClassLoader()));
         loader.load();
         loader.freeze();
         loader.loadAccessWideners();
+        // Let's throw away that hacky class loader. I won't miss you.
+        launcher.targetClassLoader = null;
 
         // 3. Initialise mixin
         initMixin();
@@ -206,6 +214,8 @@ final class Spindle {
     }
 
     private final class Launcher extends FabricLauncherBase {
+        private @Nullable ClassLoader targetClassLoader;
+
         Launcher() {
             TypesafeMap blackboard = cpw.mods.modlauncher.Launcher.INSTANCE.blackboard();
             setProperties(new TypesafeMapWrapper(blackboard));
@@ -249,6 +259,9 @@ final class Spindle {
 
         @Override
         public ClassLoader getTargetClassLoader() {
+            ClassLoader cl = targetClassLoader;
+            if (cl != null) return cl;
+
             return gameClasspath().getTargetClassLoader();
         }
 
