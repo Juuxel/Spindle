@@ -43,11 +43,15 @@ final class SpindleModClassManager {
     }
 
     List<SecureJar> getCodeSources(Classpath classpath) {
+        // A set of file keys for checking if a module has already been added to a module layer
+        // on the provided classpath. File keys are used because union URIs used by SecureJarHandler are
+        // different from file URIs.
         Set<Object> moduleFileKeys = classpath.codeSources()
             .map(Path::of)
             .filter(Files::exists)
             .map(SpindleModClassManager::getFileKey)
             .collect(Collectors.toCollection(HashSet::new));
+
         List<SecureJar> jars = new ArrayList<>(codeSources.size());
 
         for (Path source : codeSources) {
