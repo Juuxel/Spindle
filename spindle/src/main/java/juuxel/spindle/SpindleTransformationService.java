@@ -18,19 +18,8 @@ import java.util.function.BiFunction;
 
 public final class SpindleTransformationService implements ITransformationService {
     private static final String[] ARGUMENT_KEYS = new String[] {
-        "accessToken",
-        "version",
-        "versionType",
-        "gameDir",
-        "assetsDir",
-        "server",
-        "port",
-        "session",
-        "username",
-        "width",
-        "height",
-        "fabric.gameVersion",
-        "fabric.addMods",
+        "gameVersion",
+        "addMods",
     };
 
     static {
@@ -42,7 +31,7 @@ public final class SpindleTransformationService implements ITransformationServic
 
     @Override
     public @NotNull String name() {
-        return "spindle";
+        return "fabric"; // we need this for the CLI args
     }
 
     @Override
@@ -76,7 +65,7 @@ public final class SpindleTransformationService implements ITransformationServic
             String value = option.value(spec);
 
             if (value != null) {
-                argList.add("--" + key);
+                argList.add("--" + name() + "." + key);
                 argList.add(value);
             }
         });
