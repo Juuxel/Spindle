@@ -1,3 +1,33 @@
 dependencies {
     implementation libs.bundles.forge.environment
 }
+
+jar {
+    archiveClassifier = 'slim'
+}
+
+def bundleJar = tasks.register('bundleJar', Jar) {
+    from sourceSets.main.output
+    from(provider {
+        def configuration = project(':spindle').configurations.fabricLoaderDependencies.copy()
+        configuration.exclude group: 'org.ow2.asm'
+        configuration
+    }) {
+        into 'META-INF/jars'
+    }
+    from(project(':spindle').tasks.named('jar')) {
+        into 'META-INF/jars'
+    }
+}
+
+assemble {
+    dependsOn bundleJar
+}
+
+publishing {
+    publications {
+        maven {
+            artifact bundleJar
+        }
+    }
+}
