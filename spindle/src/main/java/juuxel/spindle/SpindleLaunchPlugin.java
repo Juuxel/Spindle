@@ -63,7 +63,7 @@ public final class SpindleLaunchPlugin implements ILaunchPluginService {
     }
 
     private static byte[] writeNode(ClassNode node) {
-        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+        ClassWriter writer = new ClassWriter(0);
         node.accept(writer);
         return writer.toByteArray();
     }
