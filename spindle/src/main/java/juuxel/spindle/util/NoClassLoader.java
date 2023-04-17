@@ -28,4 +28,8 @@ public final class NoClassLoader extends ClassLoader {
     public Enumeration<URL> getResources(String name) throws IOException {
         return new NoEnumeration<>();
     }
+
+    static {
+        registerAsParallelCapable();
+    }
 }
