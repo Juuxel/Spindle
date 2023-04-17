@@ -248,7 +248,7 @@ final class Spindle {
 
         @Override
         public void setValidParentClassPath(Collection<Path> paths) {
-            // TODO: Do we need this?
+            // no-op (we don't currently implement this behaviour)
         }
 
         @Override
