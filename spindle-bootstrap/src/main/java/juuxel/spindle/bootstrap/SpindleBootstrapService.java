@@ -9,17 +9,16 @@ package juuxel.spindle.bootstrap;
 import cpw.mods.modlauncher.api.NamedPath;
 import cpw.mods.modlauncher.serviceapi.ITransformerDiscoveryService;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.DirectoryStream;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public final class SpindleBootstrapService implements ITransformerDiscoveryService {
     private static final String RESET_CACHE_PROPERTY = "spindle.resetCache";
@@ -37,23 +36,41 @@ public final class SpindleBootstrapService implements ITransformerDiscoveryServi
                 .getProtectionDomain()
                 .getCodeSource()
                 .getLocation();
-            URI uri = new URI("jar:" + url.toURI());
-            List<Path> targets = new ArrayList<>();
-            try (FileSystem fs = FileSystems.newFileSystem(uri, Map.of())) {
-                Path jars = fs.getPath("META-INF", "jars");
-                try (DirectoryStream<Path> dir = Files.newDirectoryStream(jars)) {
-                    for (Path path : dir) {
-                        Path target = jarStore.resolve(path.getFileName().toString());
-                        if (resetCache || !Files.exists(target)) {
-                            Files.copy(path, target, StandardCopyOption.REPLACE_EXISTING);
-                            targets.add(target);
+            List<NamedPath> targets = new ArrayList<>();
+            try (var zip = new ZipFile(getAsFile(url.toURI()))) {
+                var entries = zip.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    if (entry.isDirectory()) continue;
+
+                    String name = entry.getName();
+                    if (!name.startsWith("META-INF/jars/")) continue;
+                    name = name.substring(name.lastIndexOf('/') + 1);
+
+                    Path target = jarStore.resolve(name);
+                    if (resetCache || !Files.exists(target)) {
+                        try (var in = zip.getInputStream(entry)) {
+                            Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
                         }
                     }
+                    targets.add(new NamedPath(name, target));
                 }
             }
-            return List.of(new NamedPath("spindle", targets.toArray(new Path[0])));
+            return List.copyOf(targets);
         } catch (Exception e) {
             throw e instanceof RuntimeException re ? re : new RuntimeException(e);
         }
+    }
+
+    private static File getAsFile(URI uri) {
+        return switch (uri.getScheme()) {
+            case "file" -> new File(uri);
+            case "union" -> {
+                String ssb = uri.getSchemeSpecificPart();
+                String path = ssb.substring(0, ssb.lastIndexOf('#'));
+                yield new File(URI.create("file:" + path));
+            }
+            default -> throw new IllegalArgumentException("Unknown URI scheme " + uri.getScheme() + " in " + uri);
+        };
     }
 }
