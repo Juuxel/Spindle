@@ -10,8 +10,16 @@ def bundleJar = tasks.register('bundleJar', Jar) {
     from sourceSets.main.output
     from(provider {
         def configuration = project(':spindle').configurations.fabricLoaderDependencies.copy()
-        configuration.exclude group: 'org.ow2.asm'
-        configuration
+        for (def group in ['org.ow2.asm', 'com.google.code.gson', 'com.google.guava']) {
+            configuration.exclude group: group
+        }
+        for (def module in ['sponge-mixin']) {
+            configuration.exclude module: module
+        }
+        files(
+            configuration,
+            project(':spindle').configurations.fabricLoader
+        )
     }) {
         into 'META-INF/jars'
     }
