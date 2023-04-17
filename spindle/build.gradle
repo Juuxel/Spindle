@@ -60,6 +60,52 @@ afterEvaluate {
     }
 }
 
+task createMultiMcPatch {
+    inputs.property('group', project.group)
+    inputs.property('name', project.name)
+    inputs.property('version', project.version)
+    inputs.files(configurations.fabricLoaderDependencies)
+    def output = new File(buildDir, 'multimc.json')
+    outputs.file(output).withPropertyName('patchFile')
+
+    doLast {
+        def configuration = configurations.fabricLoaderDependencies.copy()
+        configuration.exclude group: 'org.ow2.asm'
+        def resolved = configuration.resolvedConfiguration
+        def json = [
+            formatVersion: 1,
+            name: 'Spindle',
+            uid: 'io.github.juuxel.spindle',
+            version: project.version,
+            libraries: []
+        ]
+
+        for (def artifact : resolved.resolvedArtifacts) {
+            def id = artifact.moduleVersion.id
+            def notation = "$id.group:$id.name:$id.version"
+            json.libraries.add([
+                name: notation,
+                url: 'https://maven.fabricmc.net/'
+            ])
+        }
+
+        for (def dependency : configurations.fabricLoader.dependencies) {
+            json.libraries.add([
+                name: "$dependency.group:$dependency.name:$dependency.version",
+                url: repositories.mavenLocal().url.toString()
+            ])
+        }
+
+        def publication = (MavenPublication) publishing.publications.maven
+        json.libraries.add([
+            name: "$publication.groupId:$publication.artifactId:$publication.version",
+            url: repositories.mavenLocal().url.toString(),
+        ])
+
+        output.text = groovy.json.JsonOutput.toJson(json)
+    }
+}
+
 test {
     useJUnitPlatform()
 }
