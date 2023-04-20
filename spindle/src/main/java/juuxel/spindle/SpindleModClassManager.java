@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 final class SpindleModClassManager {
     private final List<Path> codeSources = new ArrayList<>();
     private final Map<Path, String[]> allowedPrefixes = new HashMap<>();
+    // TODO: I don't think this is useful?
     private final ModifiableUrlClassLoader classLoader = new ModifiableUrlClassLoader(new URL[0]);
 
     private static Object getFileKey(Path path) {
