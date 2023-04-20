@@ -36,7 +36,11 @@ final class SpindleModClassManager {
 
     private static Object getFileKey(Path path) {
         try {
-            return Files.readAttributes(path, BasicFileAttributes.class).fileKey();
+            Object key = Files.readAttributes(path, BasicFileAttributes.class).fileKey();
+            if (key != null) return key;
+
+            // If unavailable, use the real path of the file.
+            return path.toRealPath();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
