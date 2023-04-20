@@ -11,8 +11,8 @@ import cpw.mods.modlauncher.api.ILaunchHandlerService;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 import cpw.mods.modlauncher.api.ServiceRunner;
 import juuxel.spindle.Spindle;
-
-import java.util.Optional;
+import net.fabricmc.api.EnvType;
+import org.jetbrains.annotations.Nullable;
 
 public class SpindleLaunchHandler implements ILaunchHandlerService {
     @Override
@@ -20,8 +20,8 @@ public class SpindleLaunchHandler implements ILaunchHandlerService {
         return "spindle";
     }
 
-    public Optional<String> side() {
-        return Optional.empty();
+    public @Nullable EnvType side() {
+        return null;
     }
 
     @SuppressWarnings("removal") // you know, we have to override this...

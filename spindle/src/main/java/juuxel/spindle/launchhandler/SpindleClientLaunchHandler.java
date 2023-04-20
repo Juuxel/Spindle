@@ -6,7 +6,7 @@
 
 package juuxel.spindle.launchhandler;
 
-import java.util.Optional;
+import net.fabricmc.api.EnvType;
 
 public final class SpindleClientLaunchHandler extends SpindleLaunchHandler {
     @Override
@@ -15,7 +15,7 @@ public final class SpindleClientLaunchHandler extends SpindleLaunchHandler {
     }
 
     @Override
-    public Optional<String> side() {
-        return Optional.of("client");
+    public EnvType side() {
+        return EnvType.CLIENT;
     }
 }

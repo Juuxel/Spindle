@@ -42,7 +42,7 @@ public final class SpindleTransformationService implements ITransformationServic
 
     @Override
     public void initialize(IEnvironment environment) {
-        spindle.init();
+        spindle.init(environment);
     }
 
     @Override

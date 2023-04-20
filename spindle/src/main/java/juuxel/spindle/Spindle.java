@@ -6,11 +6,13 @@
 
 package juuxel.spindle;
 
+import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import cpw.mods.modlauncher.api.ITransformationService;
 import juuxel.spindle.classpath.Classpath;
 import juuxel.spindle.classpath.LazyClasspath;
 import juuxel.spindle.classpath.ModuleClasspath;
+import juuxel.spindle.launchhandler.LaunchHandlers;
 import juuxel.spindle.util.AdditionalResourcesClassLoader;
 import juuxel.spindle.util.Logging;
 import net.fabricmc.api.EnvType;
@@ -30,7 +32,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.ServiceLoader;
 
 public final class Spindle {
@@ -60,14 +61,14 @@ public final class Spindle {
     void preInit() {
     }
 
-    void init() {
+    void init(IEnvironment environment) {
         // Set up classpath for FabricLauncher.getClassPath
         for (String entry : System.getProperty("java.class.path").split(File.pathSeparator)) {
             launcherClasspath.add(LoaderUtil.normalizePath(Path.of(entry)));
         }
 
         // Set up Loader
-        envType = determineEnvType();
+        envType = LaunchHandlers.determineEnvType(environment);
         gameProvider = determineGameProvider();
         Log.finishBuiltinConfig();
         Logging.LOGGER.info("Loading {} {} with Fabric Loader {} via Spindle {}",
@@ -141,17 +142,6 @@ public final class Spindle {
         // 6. Build resource from mod and classpath jars
         return new ITransformationService.Resource(IModuleLayerManager.Layer.GAME,
             classManager.getCodeSources(pluginClasspath));
-    }
-
-    private static EnvType determineEnvType() {
-        String side = System.getProperty("fabric.side");
-        if (side == null) throw new NullPointerException("Please specify system property fabric.side (either 'client' or 'server')");
-
-        return switch (side.toLowerCase(Locale.ROOT)) {
-            case "client" -> EnvType.CLIENT;
-            case "server" -> EnvType.SERVER;
-            default -> throw new RuntimeException("Unknown side '%s', please specify 'client' or 'server'".formatted(side));
-        };
     }
 
     private GameProvider determineGameProvider() {
