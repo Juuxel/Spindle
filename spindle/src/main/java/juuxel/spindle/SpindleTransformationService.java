@@ -42,7 +42,7 @@ public final class SpindleTransformationService implements ITransformationServic
 
     @Override
     public void initialize(IEnvironment environment) {
-        spindle.init(environment);
+        spindle.init();
     }
 
     @Override
@@ -84,9 +84,4 @@ public final class SpindleTransformationService implements ITransformationServic
     public @NotNull List<ITransformer> transformers() {
         return List.of();
     }
-
-//    @Override
-//    public Map.Entry<Set<String>, Supplier<Function<String, Optional<URL>>>> additionalClassesLocator() {
-//        return spindle.getClassManager().getClassesLocator();
-//    }
 }

@@ -11,8 +11,6 @@ import juuxel.spindle.classpath.Classpath;
 import juuxel.spindle.util.Logging;
 import juuxel.spindle.util.NoClassLoader;
 import net.fabricmc.loader.impl.util.LoaderUtil;
-import net.fabricmc.loader.impl.util.UrlConversionException;
-import net.fabricmc.loader.impl.util.UrlUtil;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -23,16 +21,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 final class SpindleModClassManager {
@@ -104,32 +98,6 @@ final class SpindleModClassManager {
         }
 
         return false;
-    }
-
-    Map.Entry<Set<String>, Supplier<Function<String, Optional<URL>>>> getClassesLocator() {
-        Set<String> allPrefixes = allowedPrefixes.values()
-            .stream()
-            .flatMap(Arrays::stream)
-            .collect(Collectors.toSet());
-
-        Supplier<Function<String, Optional<URL>>> locator = () -> className -> {
-            String classFile = className.replace('.', '/') + ".class";
-            URL url = classLoader.getResource(classFile);
-            if (url == null) return Optional.empty();
-
-            // Check prefixes
-            try {
-                Path path = LoaderUtil.normalizeExistingPath(UrlUtil.getCodeSource(url, classFile));
-                if (!isAllowedToLoad(path, className)) {
-                    return Optional.empty();
-                }
-            } catch (UrlConversionException e) {
-                // ignored
-            }
-
-            return Optional.of(url);
-        };
-        return Map.entry(allPrefixes, locator);
     }
 
     private static final class ModifiableUrlClassLoader extends URLClassLoader {

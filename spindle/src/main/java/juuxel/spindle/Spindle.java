@@ -6,7 +6,6 @@
 
 package juuxel.spindle;
 
-import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import cpw.mods.modlauncher.api.ITransformationService;
 import juuxel.spindle.classpath.Classpath;
@@ -61,13 +60,7 @@ final class Spindle {
     void preInit() {
     }
 
-    void init(IEnvironment environment) {
-        // Set up Spindle
-//        moduleClasspath = environment.findModuleLayerManager()
-//            .flatMap(manager -> ModuleClasspath.find(manager,
-//                IModuleLayerManager.Layer.SERVICE, IModuleLayerManager.Layer.BOOT))
-//            .orElse(null);
-
+    void init() {
         // Set up classpath for FabricLauncher.getClassPath
         for (String entry : System.getProperty("java.class.path").split(File.pathSeparator)) {
             launcherClasspath.add(LoaderUtil.normalizePath(Path.of(entry)));
