@@ -141,7 +141,7 @@ public final class Spindle {
 
         // 6. Build resource from mod and classpath jars
         return new ITransformationService.Resource(IModuleLayerManager.Layer.GAME,
-            classManager.getCodeSources(pluginClasspath));
+            classManager.getCodeSources(loader, pluginClasspath));
     }
 
     private GameProvider determineGameProvider() {
