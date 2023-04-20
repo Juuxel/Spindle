@@ -85,7 +85,13 @@ final class SpindleModClassManager {
     }
 
     void setAllowedPrefixes(Path path, String[] prefixes) {
-        allowedPrefixes.put(LoaderUtil.normalizeExistingPath(path), prefixes);
+        path = LoaderUtil.normalizeExistingPath(path);
+
+        if (prefixes.length != 0) {
+            allowedPrefixes.put(path, prefixes);
+        } else {
+            allowedPrefixes.remove(path);
+        }
     }
 
     private boolean isAllowedToLoad(Path codeSource, String dottedResourceName) {
