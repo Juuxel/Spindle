@@ -6,7 +6,6 @@
 
 package juuxel.spindle.launchhandler;
 
-import cpw.mods.cl.ModuleClassLoader;
 import cpw.mods.modlauncher.api.ILaunchHandlerService;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 import cpw.mods.modlauncher.api.ServiceRunner;
@@ -32,7 +31,7 @@ public class SpindleLaunchHandler implements ILaunchHandlerService {
     @Override
     public ServiceRunner launchService(String[] arguments, ModuleLayer gameLayer) {
         return () -> {
-            ClassLoader cl = new ModuleClassLoader("Spindle", gameLayer.configuration(), gameLayer.parents());
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
             Spindle.INSTANCE.getGameProvider().launch(cl);
         };
     }
