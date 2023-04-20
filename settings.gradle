@@ -1,2 +1,12 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            url = 'https://maven.fabricmc.net'
+        }
+    }
+}
+
 include 'spindle'
 include 'spindle-bootstrap'
+include 'spindle-fabric-test'

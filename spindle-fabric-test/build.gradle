@@ -1,0 +1,41 @@
+plugins {
+    id 'fabric-loom'
+}
+
+configurations {
+    boot {
+        resolutionStrategy {
+            force loaderLibraries.allDependencies
+        }
+        attributes {
+            attribute Usage.USAGE_ATTRIBUTE, project.objects.named(Usage, Usage.JAVA_RUNTIME)
+        }
+    }
+    runtimeClasspath {
+        extendsFrom boot
+    }
+}
+
+repositories {
+    mavenLocal()
+}
+
+dependencies {
+    minecraft 'net.minecraft:minecraft:1.19.4'
+    mappings 'net.fabricmc:yarn:1.19.4+build.2:v2'
+
+    modImplementation libs.fabric.loader
+    boot project(path: ':spindle', configuration: 'jar')
+    boot libs.bundles.forge.environment
+    runtimeOnly 'cpw.mods:bootstraplauncher:1.1.2'
+}
+
+task printModulePath {
+    doLast {
+        Set<File> files = []
+        files.addAll(configurations.boot.resolve())
+        println files.collect { it.absolutePath }.join(File.pathSeparator)
+
+        new File(buildDir, 'bootstrap_classpath.txt').text = files.collect { it.absolutePath }.join('\n')
+    }
+}

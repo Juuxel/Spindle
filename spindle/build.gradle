@@ -20,6 +20,12 @@ configurations {
     compileClasspath {
         extendsFrom fabricLoaderDependencies
     }
+
+    jar {
+        canBeResolved = false
+        canBeConsumed = true
+        extendsFrom runtimeElements
+    }
 }
 
 repositories {
@@ -108,6 +114,10 @@ task createMultiMcPatch {
 
 test {
     useJUnitPlatform()
+}
+
+artifacts {
+    jar jar
 }
 
 publishing {
