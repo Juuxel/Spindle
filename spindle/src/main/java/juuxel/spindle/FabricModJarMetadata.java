@@ -40,7 +40,7 @@ final class FabricModJarMetadata implements JarMetadata {
             if (part.isEmpty()) {
                 joiner.add("$");
             } else if (!Character.isJavaIdentifierStart(part.charAt(0))) {
-                joiner.add("$" + part);
+                joiner.add("_" + part);
             } else {
                 joiner.add(part);
             }
