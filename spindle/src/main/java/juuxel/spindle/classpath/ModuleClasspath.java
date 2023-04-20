@@ -6,6 +6,7 @@
 
 package juuxel.spindle.classpath;
 
+import cpw.mods.cl.ModuleClassLoader;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import juuxel.spindle.util.AccessibleClassLoader;
 import juuxel.spindle.util.Logging;
@@ -15,11 +16,8 @@ import java.lang.module.ResolvedModule;
 import java.net.URI;
 import java.util.ArrayDeque;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -30,20 +28,8 @@ public final class ModuleClasspath implements Classpath {
     private ModuleClasspath(ModuleLayer layer, IModuleLayerManager.Layer type) {
         this.layer = layer;
 
-        Set<ClassLoader> cls = Collections.newSetFromMap(new IdentityHashMap<>());
-        for (Module module : layer.modules()) {
-            cls.add(module.getClassLoader());
-        }
-
-        if (cls.isEmpty()) {
-            throw new IllegalArgumentException("Module layer " + type.name() + " has no modules!");
-        } else if (cls.size() > 1) {
-            Logging.LOGGER.error(Logging.MODULES,
-                "Module layer {} has more than one class loader: {}; choosing first one",
-                type, cls);
-        }
-
-        classLoader = new AccessibleClassLoader("Spindle/" + type.name(), cls.iterator().next());
+        ClassLoader parentClassLoader = new ModuleClassLoader("Spindle/" + type.name(), layer.configuration(), layer.parents());
+        classLoader = new AccessibleClassLoader("Spindle/" + type.name(), parentClassLoader);
     }
 
     private static void visitResolvedModules(Configuration config, Consumer<ResolvedModule> sink) {
