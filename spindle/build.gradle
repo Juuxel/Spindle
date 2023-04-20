@@ -21,10 +21,9 @@ configurations {
         extendsFrom fabricLoaderDependencies
     }
 
-    jar {
+    dev {
         canBeResolved = false
         canBeConsumed = true
-        extendsFrom runtimeElements
     }
 }
 
@@ -48,6 +47,14 @@ dependencies {
 jar {
     manifest {
         attributes 'Automatic-Module-Name': 'io.github.juuxel.spindle'
+    }
+}
+
+task runtimeJar(type: Jar) {
+    archiveClassifier = 'rt'
+    from sourceSets.main.output
+    manifest {
+        attributes.putAll(jar.manifest.attributes)
     }
 }
 
@@ -117,7 +124,7 @@ test {
 }
 
 artifacts {
-    jar jar
+    dev runtimeJar
 }
 
 publishing {

@@ -25,7 +25,8 @@ dependencies {
     mappings 'net.fabricmc:yarn:1.19.4+build.2:v2'
 
     modImplementation libs.fabric.loader
-    boot project(path: ':spindle', configuration: 'jar')
+    boot libs.fabric.loader
+    boot project(path: ':spindle', configuration: 'dev')
     boot libs.bundles.forge.environment
     runtimeOnly 'cpw.mods:bootstraplauncher:1.1.2'
 }
