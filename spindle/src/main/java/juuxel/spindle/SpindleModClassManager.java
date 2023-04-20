@@ -82,7 +82,7 @@ final class SpindleModClassManager {
                 // Not perfect, but this is good enough in practice.
                 // Mods shouldn't have any filters in the first place.
                 BiPredicate<String, String> pathFilter = Fp.any(filters);
-                jars.add(SecureJar.from(jar -> new FabricModJarMetadata(mod), pathFilter, modPaths.toArray(new Path[0])));
+                jars.add(SecureJar.from(jar -> new FabricModJarMetadata(mod, jar), pathFilter, modPaths.toArray(new Path[0])));
             }
         }
 

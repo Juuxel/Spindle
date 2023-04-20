@@ -7,6 +7,7 @@
 package juuxel.spindle;
 
 import cpw.mods.jarhandling.JarMetadata;
+import cpw.mods.jarhandling.SecureJar;
 import juuxel.spindle.util.Logging;
 import net.fabricmc.loader.api.ModContainer;
 
@@ -15,11 +16,13 @@ import java.util.StringJoiner;
 
 final class FabricModJarMetadata implements JarMetadata {
     private final ModContainer modContainer;
+    private final SecureJar jar;
     private String name;
     private ModuleDescriptor descriptor;
 
-    FabricModJarMetadata(ModContainer modContainer) {
+    FabricModJarMetadata(ModContainer modContainer, SecureJar jar) {
         this.modContainer = modContainer;
+        this.jar = jar;
     }
 
     @Override
@@ -62,8 +65,14 @@ final class FabricModJarMetadata implements JarMetadata {
     @Override
     public ModuleDescriptor descriptor() {
         if (descriptor != null) return descriptor;
-        return descriptor = ModuleDescriptor.newAutomaticModule(name())
+        ModuleDescriptor.Builder builder = ModuleDescriptor.newAutomaticModule(name())
             .version(version())
-            .build();
+            .packages(jar.getPackages());
+
+        jar.getProviders().stream()
+            .filter(provider -> !provider.providers().isEmpty())
+            .forEach(provider -> builder.provides(provider.serviceName(), provider.providers()));
+
+        return descriptor = builder.build();
     }
 }
