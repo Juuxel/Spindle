@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ServiceLoader;
 
-final class Spindle {
-    static final Spindle INSTANCE = new Spindle();
+public final class Spindle {
+    public static final Spindle INSTANCE = new Spindle();
 
     private final SpindleFabricLauncher launcher = new SpindleFabricLauncher(this);
     final SpindleModClassManager classManager = new SpindleModClassManager();

@@ -1,0 +1,3 @@
+juuxel.spindle.launchhandler.SpindleLaunchHandler
+juuxel.spindle.launchhandler.SpindleClientLaunchHandler
+juuxel.spindle.launchhandler.SpindleDedicatedServerLaunchHandler
