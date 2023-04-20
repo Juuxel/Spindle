@@ -9,13 +9,11 @@ package juuxel.spindle;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import cpw.mods.modlauncher.api.ITransformationService;
-import cpw.mods.modlauncher.api.TypesafeMap;
 import juuxel.spindle.classpath.Classpath;
 import juuxel.spindle.classpath.LazyClasspath;
 import juuxel.spindle.classpath.ModuleClasspath;
 import juuxel.spindle.util.AdditionalResourcesClassLoader;
 import juuxel.spindle.util.Logging;
-import juuxel.spindle.util.TypesafeMapWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
@@ -23,32 +21,29 @@ import net.fabricmc.loader.impl.FormattedException;
 import net.fabricmc.loader.impl.ModContainerImpl;
 import net.fabricmc.loader.impl.entrypoint.EntrypointUtils;
 import net.fabricmc.loader.impl.game.GameProvider;
-import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import net.fabricmc.loader.impl.util.LoaderUtil;
 import net.fabricmc.loader.impl.util.log.Log;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixins;
 
 import java.io.File;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.ServiceLoader;
-import java.util.jar.Manifest;
 
 final class Spindle {
     static final Spindle INSTANCE = new Spindle();
 
-    private final Launcher launcher = new Launcher();
-    private final SpindleModClassManager classManager = new SpindleModClassManager();
+    private final SpindleFabricLauncher launcher = new SpindleFabricLauncher(this);
+    final SpindleModClassManager classManager = new SpindleModClassManager();
     private EnvType envType;
     private GameProvider gameProvider;
     private FabricLoaderImpl loader;
     private Classpath pluginClasspath;
-    private @Nullable Classpath gameClasspath;
+    @Nullable Classpath gameClasspath;
     private boolean isDevelopment;
     private final List<Path> launcherClasspath = new ArrayList<>();
     private String[] args;
@@ -102,6 +97,10 @@ final class Spindle {
             () -> ModuleClasspath.findThrowing(layerManager, IModuleLayerManager.Layer.GAME),
             pluginClasspath
         );
+    }
+
+    List<Path> getLauncherClasspath() {
+        return Collections.unmodifiableList(launcherClasspath);
     }
 
     ITransformationService.Resource loadMods() {
@@ -225,101 +224,5 @@ final class Spindle {
 
     public EnvType getEnvType() {
         return envType;
-    }
-
-    private final class Launcher extends FabricLauncherBase {
-        private @Nullable ClassLoader targetClassLoader;
-
-        Launcher() {
-            TypesafeMap blackboard = cpw.mods.modlauncher.Launcher.INSTANCE.blackboard();
-            setProperties(new TypesafeMapWrapper(blackboard));
-        }
-
-        @Override
-        public void addToClassPath(Path path, String... allowedPrefixes) {
-            classManager.addCodeSource(path);
-            classManager.setAllowedPrefixes(path, allowedPrefixes);
-        }
-
-        @Override
-        public void setAllowedPrefixes(Path path, String... prefixes) {
-            classManager.setAllowedPrefixes(path, prefixes);
-        }
-
-        @Override
-        public void setValidParentClassPath(Collection<Path> paths) {
-            // no-op (we don't currently implement this behaviour)
-        }
-
-        @Override
-        public EnvType getEnvironmentType() {
-            return getEnvType();
-        }
-
-        @Override
-        public boolean isClassLoaded(String name) {
-            return gameClasspath().isClassLoaded(name);
-        }
-
-        @Override
-        public Class<?> loadIntoTarget(String name) throws ClassNotFoundException {
-            return gameClasspath().loadIntoTarget(name);
-        }
-
-        @Override
-        public InputStream getResourceAsStream(String name) {
-            return getTargetClassLoader().getResourceAsStream(name);
-        }
-
-        @Override
-        public ClassLoader getTargetClassLoader() {
-            ClassLoader cl = targetClassLoader;
-            if (cl != null) return cl;
-
-            return gameClasspath().getTargetClassLoader();
-        }
-
-        @Override
-        public byte[] getClassByteArray(String name, boolean runTransformers) {
-            // only used by MixinServiceKnot as of 0.14.19
-            throw new UnsupportedOperationException("getClassByteArray");
-        }
-
-        @Override
-        public Manifest getManifest(Path originPath) {
-            // not used at all as of 0.14.19
-            throw new UnsupportedOperationException("getManifest");
-        }
-
-        @Override
-        public boolean isDevelopment() {
-            return Spindle.this.isDevelopment();
-        }
-
-        @Override
-        public String getEntrypoint() {
-            return getGameProvider().getEntrypoint();
-        }
-
-        @Override
-        public String getTargetNamespace() {
-            return isDevelopment() ? "named" : "intermediary";
-        }
-
-        @Override
-        public List<Path> getClassPath() {
-            return launcherClasspath;
-        }
-
-        @Override
-        public boolean useFabricMixinServices() {
-            return false;
-        }
-
-        private Classpath gameClasspath() {
-            Classpath cp = gameClasspath;
-            if (cp == null) throw new IllegalStateException("Game classpath not available");
-            return cp;
-        }
     }
 }
