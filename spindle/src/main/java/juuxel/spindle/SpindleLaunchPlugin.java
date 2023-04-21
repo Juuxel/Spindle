@@ -16,6 +16,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 
 public final class SpindleLaunchPlugin implements ILaunchPluginService {
@@ -30,7 +31,7 @@ public final class SpindleLaunchPlugin implements ILaunchPluginService {
     }
 
     @Override
-    public boolean processClass(Phase phase, ClassNode classNode, Type classType) {
+    public int processClassWithFlags(Phase phase, ClassNode classNode, Type classType, String reason) {
         Spindle spindle = Spindle.INSTANCE;
 
         // Try to apply entrypoint patch
@@ -38,10 +39,12 @@ public final class SpindleLaunchPlugin implements ILaunchPluginService {
         byte[] bytes = spindle.getGameProvider()
             .getEntrypointTransformer()
             .transform(getDottyName(classNode));
+        boolean appliedEntrypointPatch = true;
 
         if (bytes == null) {
             // Write out original class
             bytes = writeNode(classNode);
+            appliedEntrypointPatch = false;
         } else {
             FindNameVisitor visitor = new FindNameVisitor();
             new ClassReader(bytes)
@@ -50,12 +53,15 @@ public final class SpindleLaunchPlugin implements ILaunchPluginService {
         }
 
         // Transform
-        bytes = FabricTransformer.transform(spindle.isDevelopment(), spindle.getEnvType(), dottyName, bytes);
+        byte[] newBytes = FabricTransformer.transform(spindle.isDevelopment(), spindle.getEnvType(), dottyName, bytes);
 
-        // Read back new bytes
-        insertBytesIntoNode(classNode, bytes);
+        if (appliedEntrypointPatch || !Arrays.equals(bytes, newBytes)) {
+            // Read back new bytes
+            insertBytesIntoNode(classNode, newBytes);
+            return ComputeFlags.SIMPLE_REWRITE;
+        }
 
-        return false;
+        return ComputeFlags.NO_REWRITE;
     }
 
     private static String getDottyName(ClassNode node) {
