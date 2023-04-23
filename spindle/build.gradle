@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'org.gradlex.extra-java-module-info'
 }
 
 configurations {
@@ -44,18 +45,17 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
-jar {
-    manifest {
-        attributes 'Automatic-Module-Name': 'io.github.juuxel.spindle'
-    }
+extraJavaModuleInfo {
+    failOnMissingModuleInfo = false
+    // Restore missing mixin module name
+    automaticModule 'net.fabricmc:sponge-mixin', 'org.spongepowered.mixin'
+    // This is the one used by ModLauncher too
+    automaticModule 'net.sf.jopt-simple:jopt-simple', 'jopt.simple'
 }
 
 task runtimeJar(type: Jar) {
     archiveClassifier = 'rt'
     from sourceSets.main.output
-    manifest {
-        attributes.putAll(jar.manifest.attributes)
-    }
 }
 
 import groovy.json.JsonSlurper

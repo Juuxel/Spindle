@@ -1,6 +1,7 @@
 plugins {
     id("net.kyori.indra.licenser.spotless") version "3.0.1" apply false
     id("fabric-loom") version "1.2.+" apply false
+    id 'org.gradlex.extra-java-module-info' version '1.2' apply false
 }
 
 subprojects {
