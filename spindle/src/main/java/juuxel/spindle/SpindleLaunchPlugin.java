@@ -6,8 +6,11 @@
 
 package juuxel.spindle;
 
+import cpw.mods.modlauncher.TransformingClassLoader;
+import cpw.mods.modlauncher.api.NamedPath;
 import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
 import juuxel.spindle.util.ClassClearer;
+import juuxel.spindle.util.Logging;
 import net.fabricmc.loader.impl.transformer.FabricTransformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -23,6 +26,17 @@ public final class SpindleLaunchPlugin implements ILaunchPluginService {
     @Override
     public String name() {
         return "spindle";
+    }
+
+    @Override
+    public void initializeLaunch(ITransformerLoader transformerLoader, NamedPath[] specialPaths) {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+        if (classLoader instanceof TransformingClassLoader) {
+            Spindle.INSTANCE.getLauncher().setTargetClassLoader(classLoader);
+        } else {
+            Logging.LOGGER.warn(Logging.CLASSLOADING, "Expected TransformingClassLoader, found {}", classLoader.getClass().getName());
+        }
     }
 
     @Override

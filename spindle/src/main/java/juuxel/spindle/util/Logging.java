@@ -15,6 +15,7 @@ public final class Logging {
     public static final Logger LOGGER = LogManager.getLogger("Spindle");
     public static final Marker LOADING = marker("Loading");
     public static final Marker MODULES = marker("Modules");
+    public static final Marker CLASSLOADING = marker("Classloading");
 
     private static Marker marker(String... names) {
         Marker root = MarkerManager.getMarker("SPINDLE");
