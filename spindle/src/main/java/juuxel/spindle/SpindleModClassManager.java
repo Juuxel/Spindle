@@ -15,14 +15,11 @@ import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.fabricmc.loader.impl.ModContainerImpl;
 import net.fabricmc.loader.impl.util.LoaderUtil;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,26 +36,21 @@ final class SpindleModClassManager {
     // TODO: I don't think this is useful?
     private final ModifiableUrlClassLoader classLoader = new ModifiableUrlClassLoader(new URL[0]);
 
-    private static Object getFileKey(Path path) {
-        try {
-            Object key = Files.readAttributes(path, BasicFileAttributes.class).fileKey();
-            if (key != null) return key;
-
-            // If unavailable, use the real path of the file.
-            return path.toRealPath();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+    private static Path getUnderlyingPath(URI uri) {
+        if (uri.getScheme().equals("union")) {
+            String ssb = uri.getSchemeSpecificPart();
+            String path = ssb.substring(0, ssb.lastIndexOf('#'));
+            uri = URI.create("file:" + path);
         }
+
+        return LoaderUtil.normalizePath(Path.of(uri));
     }
 
     List<SecureJar> getCodeSources(FabricLoaderImpl loader, Classpath classpath) {
-        // A set of file keys for checking if a module has already been added to a module layer
-        // on the provided classpath. File keys are used because union URIs used by SecureJarHandler are
-        // different from file URIs.
-        Set<Object> moduleFileKeys = classpath.codeSources()
-            .map(Path::of)
-            .filter(Files::exists)
-            .map(SpindleModClassManager::getFileKey)
+        // A set of paths for checking if a module has already been added to a module layer
+        // on the provided classpath.
+        Set<Path> pathsInUse = classpath.codeSources()
+            .map(SpindleModClassManager::getUnderlyingPath)
             .collect(Collectors.toCollection(HashSet::new));
 
         Set<Path> remainingCodeSources = new LinkedHashSet<>(codeSources);
@@ -72,7 +64,7 @@ final class SpindleModClassManager {
                 // just in case
                 source = LoaderUtil.normalizeExistingPath(source);
 
-                if (remainingCodeSources.remove(source)) {
+                if (remainingCodeSources.remove(source) && checkPathAvailable(source, pathsInUse)) {
                     modPaths.add(source);
                     filters.add(createPathFilter(source));
                 }
@@ -88,19 +80,24 @@ final class SpindleModClassManager {
         }
 
         for (Path source : remainingCodeSources) {
-            Object fileKey = getFileKey(source);
-            if (moduleFileKeys.contains(fileKey)) {
-                Logging.LOGGER.debug(Logging.MODULES, "Skipping {} because it is already provided", source);
-                continue;
-            } else {
+            if (checkPathAvailable(source, pathsInUse)) {
                 Logging.LOGGER.debug(Logging.MODULES, "Adding code source {} to module layer GAME", source);
-                moduleFileKeys.add(fileKey);
+                jars.add(SecureJar.from(createPathFilter(source), source));
             }
-
-            jars.add(SecureJar.from(createPathFilter(source), source));
         }
 
         return jars;
+    }
+
+    private static boolean checkPathAvailable(Path source, Set<Path> pathsInUse) {
+        Path realPath = getUnderlyingPath(source.toUri());
+        if (pathsInUse.contains(realPath)) {
+            Logging.LOGGER.debug(Logging.MODULES, "Skipping {} because it is already provided", source);
+            return false;
+        } else {
+            pathsInUse.add(realPath);
+            return true;
+        }
     }
 
     void addCodeSource(Path path) {
