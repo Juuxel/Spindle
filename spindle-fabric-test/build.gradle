@@ -51,6 +51,7 @@ dependencies {
 
     runtimeOnly libs.bootstraplauncher
     modulePath libs.bootstraplauncher
+    modulePath libs.securejarhandler
     modulePath libs.bundles.asm
 }
 
