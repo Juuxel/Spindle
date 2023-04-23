@@ -2,6 +2,10 @@ plugins {
     id 'fabric-loom'
 }
 
+loom {
+    log4jConfigs.from file('log4j.xml')
+}
+
 configurations {
     runtimeOnlyModule {
         canBeResolved = true

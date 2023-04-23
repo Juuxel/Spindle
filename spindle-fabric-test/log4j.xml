@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration>
+    <Appenders>
+        <Null name="Null"/>
+    </Appenders>
+    <Loggers>
+        <!-- Make ClassTransformer quiet down. -->
+        <Logger level="info" name="cpw.mods.modlauncher.ClassTransformer"/>
+        <!-- Reroute the root logger into a null appender. The actual logging is handled by another config. -->
+        <Root level="all">
+            <AppenderRef ref="Null"/>
+        </Root>
+    </Loggers>
+</Configuration>
