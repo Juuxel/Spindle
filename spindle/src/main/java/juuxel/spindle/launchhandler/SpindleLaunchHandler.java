@@ -35,6 +35,8 @@ public class SpindleLaunchHandler implements ILaunchHandlerService {
     @Override
     public ServiceRunner launchService(String[] arguments, ModuleLayer gameLayer) {
         return () -> {
+            Spindle.INSTANCE.getLauncher().setTargetClassLoader(Thread.currentThread().getContextClassLoader());
+
             Module minecraft = gameLayer.findModule("minecraft").orElseThrow();
             GameProvider provider = Spindle.INSTANCE.getGameProvider();
             String entrypoint = provider.getEntrypoint();

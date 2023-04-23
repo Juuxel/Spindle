@@ -20,9 +20,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.jar.Manifest;
 
-final class SpindleFabricLauncher extends FabricLauncherBase {
+public final class SpindleFabricLauncher extends FabricLauncherBase {
     private final Spindle spindle;
-    @Nullable ClassLoader targetClassLoader;
+    private @Nullable ClassLoader targetClassLoader;
 
     SpindleFabricLauncher(Spindle spindle) {
         this.spindle = spindle;
@@ -115,5 +115,9 @@ final class SpindleFabricLauncher extends FabricLauncherBase {
         Classpath cp = spindle.gameClasspath;
         if (cp == null) throw new IllegalStateException("Game classpath not available");
         return cp;
+    }
+
+    public void setTargetClassLoader(@Nullable ClassLoader targetClassLoader) {
+        this.targetClassLoader = targetClassLoader;
     }
 }

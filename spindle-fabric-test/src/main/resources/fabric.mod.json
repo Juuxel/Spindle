@@ -1,5 +1,9 @@
 {
   "schemaVersion": 1,
   "id": "spindle_fabric_test",
-  "version": "1"
+  "version": "1",
+
+  "entrypoints": {
+    "main": ["juuxel.spindle.test.SpindleTest"]
+  }
 }

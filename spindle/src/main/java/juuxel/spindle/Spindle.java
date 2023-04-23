@@ -111,12 +111,12 @@ public final class Spindle {
         // only reads resources from the system class loader.
         ClassLoader discoveryClassLoader = new AdditionalResourcesClassLoader(launcher.getTargetClassLoader(),
             List.of(ClassLoader.getSystemClassLoader()));
-        launcher.targetClassLoader = discoveryClassLoader;
+        launcher.setTargetClassLoader(discoveryClassLoader);
         loader.load();
         loader.freeze();
         loader.loadAccessWideners();
         // Let's throw away that hacky class loader. I won't miss you.
-        launcher.targetClassLoader = null;
+        launcher.setTargetClassLoader(null);
 
         // 3. Initialise mixin
         ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
@@ -193,6 +193,10 @@ public final class Spindle {
                 }
             }
         }
+    }
+
+    public SpindleFabricLauncher getLauncher() {
+        return launcher;
     }
 
     public GameProvider getGameProvider() {
