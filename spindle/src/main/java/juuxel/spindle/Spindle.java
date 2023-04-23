@@ -71,7 +71,7 @@ public final class Spindle {
         envType = LaunchHandlers.determineEnvType(environment);
         gameProvider = determineGameProvider();
         Log.finishBuiltinConfig();
-        Logging.LOGGER.info("Loading {} {} with Fabric Loader {} via Spindle {}",
+        Logging.LOGGER.info(Logging.LOADING, "Loading {} {} with Fabric Loader {} via Spindle {}",
             gameProvider.getGameName(),
             gameProvider.getRawGameVersion(),
             FabricLoaderImpl.VERSION,

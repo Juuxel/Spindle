@@ -86,7 +86,7 @@ public final class LaunchHandlers {
 
             return null;
         } catch (ReflectiveOperationException e) {
-            Logging.LOGGER.debug("Could not find env type for launch handler service {} - it is probably not FML's", service, e);
+            Logging.LOGGER.debug(Logging.LOADING, "Could not find env type for launch handler service {} - it is probably not FML's", service, e);
             return null;
         }
     }

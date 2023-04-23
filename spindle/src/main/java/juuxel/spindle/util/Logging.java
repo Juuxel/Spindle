@@ -17,6 +17,13 @@ public final class Logging {
     public static final Marker MODULES = marker("Modules");
 
     private static Marker marker(String... names) {
-        return MarkerManager.getMarker(String.join("/", names));
+        Marker root = MarkerManager.getMarker("SPINDLE");
+        Marker next = root;
+
+        for (String name : names) {
+            next = MarkerManager.getMarker(name).addParents(next);
+        }
+
+        return next;
     }
 }
