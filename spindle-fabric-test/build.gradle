@@ -3,23 +3,7 @@ plugins {
 }
 
 configurations {
-    boot {
-        canBeResolved = true
-        canBeConsumed = false
-
-        extendsFrom loaderLibraries
-        extendsFrom loomDevelopmentDependencies
-
-        resolutionStrategy {
-            force minecraftRuntimeLibraries.allDependencies
-        }
-
-        attributes {
-            attribute Usage.USAGE_ATTRIBUTE, project.objects.named(Usage, Usage.JAVA_RUNTIME)
-        }
-    }
-
-    modulePath {
+    runtimeOnlyModule {
         canBeResolved = true
         canBeConsumed = false
 
@@ -29,8 +13,8 @@ configurations {
         }
     }
 
-    runtimeClasspath {
-        extendsFrom boot
+    runtimeOnly {
+        extendsFrom runtimeOnlyModule
     }
 }
 
@@ -43,16 +27,10 @@ dependencies {
     mappings 'net.fabricmc:yarn:1.19.4+build.2:v2'
 
     modImplementation libs.fabric.loader
-    boot libs.fabric.loader
-    boot project(path: ':spindle', configuration: 'dev')
-    boot libs.bundles.forge.environment
-    boot 'net.minecrell:terminalconsoleappender'
-    boot 'com.mojang:logging'
-
-    runtimeOnly libs.bootstraplauncher
-    modulePath libs.bootstraplauncher
-    modulePath libs.securejarhandler
-    modulePath libs.bundles.asm
+    runtimeOnlyModule libs.fabric.loader
+    runtimeOnlyModule project(path: ':spindle', configuration: 'dev')
+    runtimeOnlyModule libs.bundles.forge.environment
+    runtimeOnlyModule libs.bundles.asm
 }
 
 def resolvePaths(Configuration configuration) {
@@ -60,13 +38,10 @@ def resolvePaths(Configuration configuration) {
 }
 
 def setupClasspathData() {
-    def modulePath = resolvePaths(configurations.modulePath).join(File.pathSeparator)
-    def classpathFile = new File(buildDir, 'bootstrap_classpath.txt')
-    classpathFile.text = resolvePaths(configurations.boot).join('\n')
+    def modulePath = resolvePaths(configurations.runtimeOnlyModule).join(File.pathSeparator)
 
     return [
         modulePath   : modulePath,
-        classpathFile: classpathFile
     ]
 }
 
@@ -78,7 +53,7 @@ afterEvaluate {
             spindleClient {
                 client()
                 configName = 'Spindle Client'
-                mainClass.set 'cpw.mods.bootstraplauncher.BootstrapLauncher'
+                mainClass.set 'cpw.mods.modlauncher.Launcher'
                 ideConfigGenerated = true
 
                 programArgs '--launchTarget', 'spindleclient'
@@ -87,7 +62,6 @@ afterEvaluate {
                     '--add-opens', 'java.base/java.util.jar=cpw.mods.securejarhandler',
                     '--add-opens', 'java.base/java.lang.invoke=cpw.mods.securejarhandler',
                     '--add-exports', 'java.base/sun.security.util=cpw.mods.securejarhandler'
-                property 'legacyClassPath.file', classpathData.classpathFile.absolutePath
             }
         }
     }
