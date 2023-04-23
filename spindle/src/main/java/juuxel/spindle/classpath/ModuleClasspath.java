@@ -28,7 +28,8 @@ public final class ModuleClasspath implements Classpath {
     private ModuleClasspath(ModuleLayer layer, IModuleLayerManager.Layer type) {
         this.layer = layer;
 
-        ClassLoader parentClassLoader = new ModuleClassLoader("Spindle/" + type.name(), layer.configuration(), layer.parents());
+        ModuleClassLoader parentClassLoader = new ModuleClassLoader("Spindle/" + type.name(), layer.configuration(), layer.parents());
+        parentClassLoader.setFallbackClassLoader(Thread.currentThread().getContextClassLoader());
         classLoader = new AccessibleClassLoader("Spindle/" + type.name(), parentClassLoader);
     }
 
