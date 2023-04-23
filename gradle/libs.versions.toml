@@ -6,6 +6,7 @@ jetbrains-annotations = "24.0.1"
 gson = "2.10.1"
 joptsimple = "5.0.4"
 log4j = "2.17.1"
+bootstraplauncher = "1.1.2"
 
 [libraries]
 modlauncher = { module = "cpw.mods:modlauncher", version.ref = "modlauncher" }
@@ -15,6 +16,13 @@ jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "j
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 joptsimple = { module = "net.sf.jopt-simple:jopt-simple", version.ref = "joptsimple" }
 log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
+bootstraplauncher = { module = "cpw.mods:bootstraplauncher", version.ref = "bootstraplauncher" }
+asm-core = { module = "org.ow2.asm:asm" }
+asm-analysis = { module = "org.ow2.asm:asm-analysis" }
+asm-commons = { module = "org.ow2.asm:asm-commons" }
+asm-tree = { module = "org.ow2.asm:asm-tree" }
+asm-util = { module = "org.ow2.asm:asm-util" }
 
 [bundles]
 forge-environment = ["modlauncher", "securejarhandler"]
+asm = ["asm-core", "asm-analysis", "asm-commons", "asm-tree", "asm-util"]

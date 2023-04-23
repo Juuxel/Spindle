@@ -4,13 +4,31 @@ plugins {
 
 configurations {
     boot {
+        canBeResolved = true
+        canBeConsumed = false
+
+        extendsFrom loaderLibraries
+        extendsFrom loomDevelopmentDependencies
+
         resolutionStrategy {
-            force loaderLibraries.allDependencies
+            force minecraftRuntimeLibraries.allDependencies
         }
+
         attributes {
             attribute Usage.USAGE_ATTRIBUTE, project.objects.named(Usage, Usage.JAVA_RUNTIME)
         }
     }
+
+    modulePath {
+        canBeResolved = true
+        canBeConsumed = false
+
+        resolutionStrategy {
+            force loaderLibraries.allDependencies
+            force minecraftRuntimeLibraries.allDependencies
+        }
+    }
+
     runtimeClasspath {
         extendsFrom boot
     }
@@ -28,15 +46,48 @@ dependencies {
     boot libs.fabric.loader
     boot project(path: ':spindle', configuration: 'dev')
     boot libs.bundles.forge.environment
-    runtimeOnly 'cpw.mods:bootstraplauncher:1.1.2'
+    boot 'net.minecrell:terminalconsoleappender'
+    boot 'com.mojang:logging'
+
+    runtimeOnly libs.bootstraplauncher
+    modulePath libs.bootstraplauncher
+    modulePath libs.bundles.asm
 }
 
-task printModulePath {
-    doLast {
-        Set<File> files = []
-        files.addAll(configurations.boot.resolve())
-        println files.collect { it.absolutePath }.join(File.pathSeparator)
+def resolvePaths(Configuration configuration) {
+    return configuration.resolve().collect { it.absolutePath }
+}
 
-        new File(buildDir, 'bootstrap_classpath.txt').text = files.collect { it.absolutePath }.join('\n')
+def setupClasspathData() {
+    def modulePath = resolvePaths(configurations.modulePath).join(File.pathSeparator)
+    def classpathFile = new File(buildDir, 'bootstrap_classpath.txt')
+    classpathFile.text = resolvePaths(configurations.boot).join('\n')
+
+    return [
+        modulePath   : modulePath,
+        classpathFile: classpathFile
+    ]
+}
+
+afterEvaluate {
+    def classpathData = setupClasspathData()
+
+    loom {
+        runs {
+            spindleClient {
+                client()
+                configName = 'Spindle Client'
+                mainClass.set 'cpw.mods.bootstraplauncher.BootstrapLauncher'
+                ideConfigGenerated = true
+
+                programArgs '--launchTarget', 'spindleclient'
+                vmArgs '-p', classpathData.modulePath,
+                    '--add-modules', 'ALL-MODULE-PATH',
+                    '--add-opens', 'java.base/java.util.jar=cpw.mods.securejarhandler',
+                    '--add-opens', 'java.base/java.lang.invoke=cpw.mods.securejarhandler',
+                    '--add-exports', 'java.base/sun.security.util=cpw.mods.securejarhandler'
+                property 'legacyClassPath.file', classpathData.classpathFile.absolutePath
+            }
+        }
     }
 }
