@@ -10,15 +10,11 @@ import cpw.mods.jarhandling.SecureJar;
 import juuxel.spindle.classpath.Classpath;
 import juuxel.spindle.util.Fp;
 import juuxel.spindle.util.Logging;
-import juuxel.spindle.util.NoClassLoader;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.fabricmc.loader.impl.ModContainerImpl;
 import net.fabricmc.loader.impl.util.LoaderUtil;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,8 +29,6 @@ import java.util.stream.Collectors;
 final class SpindleModClassManager {
     private final List<Path> codeSources = new ArrayList<>();
     private final Map<Path, String[]> allowedPrefixes = new HashMap<>();
-    // TODO: I don't think this is useful?
-    private final ModifiableUrlClassLoader classLoader = new ModifiableUrlClassLoader(new URL[0]);
 
     private static Path getUnderlyingPath(URI uri) {
         if (uri.getScheme().equals("union")) {
@@ -102,13 +96,7 @@ final class SpindleModClassManager {
 
     void addCodeSource(Path path) {
         path = LoaderUtil.normalizeExistingPath(path);
-
-        try {
-            codeSources.add(path);
-            classLoader.addURL(path.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Could not convert path " + path + " to URL", e);
-        }
+        codeSources.add(path);
     }
 
     void setAllowedPrefixes(Path path, String[] prefixes) {
@@ -139,20 +127,5 @@ final class SpindleModClassManager {
         }
 
         return false;
-    }
-
-    private static final class ModifiableUrlClassLoader extends URLClassLoader {
-        public ModifiableUrlClassLoader(URL[] urls) {
-            super(urls, new NoClassLoader());
-        }
-
-        @Override
-        public void addURL(URL url) {
-            super.addURL(url);
-        }
-
-        static {
-            registerAsParallelCapable();
-        }
     }
 }
