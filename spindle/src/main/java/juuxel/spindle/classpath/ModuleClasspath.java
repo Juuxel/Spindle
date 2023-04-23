@@ -21,6 +21,9 @@ import java.util.Queue;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+/**
+ * A classpath created from a {@linkplain ModuleLayer module layer}.
+ */
 public final class ModuleClasspath implements Classpath {
     private final ModuleLayer layer;
     private final AccessibleClassLoader classLoader;
@@ -48,6 +51,13 @@ public final class ModuleClasspath implements Classpath {
         }
     }
 
+    /**
+     * Tries to find a module layer and create a module classpath for it.
+     *
+     * @param layerManager the module layer manager
+     * @param layers       the different module layer types to try
+     * @return the module classpath, or empty if no module layer is found
+     */
     public static Optional<ModuleClasspath> find(IModuleLayerManager layerManager, IModuleLayerManager.Layer... layers) {
         try {
             return Optional.of(findThrowing(layerManager, layers));
@@ -57,6 +67,14 @@ public final class ModuleClasspath implements Classpath {
         }
     }
 
+    /**
+     * Tries to find a module layer and create a module classpath for it.
+     *
+     * @param layerManager the module layer manager
+     * @param layers       the different module layer types to try
+     * @return the module classpath
+     * @throws ClasspathCreationException if no module layer was found
+     */
     public static ModuleClasspath findThrowing(IModuleLayerManager layerManager, IModuleLayerManager.Layer... layers)
         throws ClasspathCreationException {
         ModuleLayer layer = null;

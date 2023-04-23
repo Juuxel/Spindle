@@ -6,6 +6,9 @@
 
 package juuxel.spindle.classpath;
 
+/**
+ * An exception that indicates that a {@linkplain Classpath} could not be created.
+ */
 public class ClasspathCreationException extends Exception {
     public ClasspathCreationException(String message) {
         super(message);

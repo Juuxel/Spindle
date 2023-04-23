@@ -10,11 +10,21 @@ import java.net.URI;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+/**
+ * A lazy classpath that tries to construct a classpath if it's available.
+ * Otherwise, it uses a fallback.
+ */
 public final class LazyClasspath implements Classpath {
     private Factory factory;
     private Classpath real;
     private Classpath fallback;
 
+    /**
+     * Constructs a lazy classpath.
+     *
+     * @param factory  the factory of the primary target classpath
+     * @param fallback the fallback target classpath
+     */
     public LazyClasspath(Factory factory, Classpath fallback) {
         this.factory = Objects.requireNonNull(factory, "factory");
         this.fallback = Objects.requireNonNull(fallback, "fallback");
@@ -60,8 +70,17 @@ public final class LazyClasspath implements Classpath {
         return getEffective().loadIntoTarget(name);
     }
 
+    /**
+     * A factory for classpaths.
+     */
     @FunctionalInterface
     public interface Factory {
+        /**
+         * Creates a classpath.
+         *
+         * @return the created classpath
+         * @throws ClasspathCreationException if creation did not succeed
+         */
         Classpath create() throws ClasspathCreationException;
     }
 }
