@@ -23,6 +23,9 @@ public class SpindleLaunchHandler implements ILaunchHandlerService {
         return "spindle";
     }
 
+    /**
+     * {@return the default environment type of this launch handler, or {@code null} if not available}
+     */
     public @Nullable EnvType side() {
         return null;
     }

@@ -15,11 +15,30 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
+/**
+ * Utilities for working with {@linkplain ILaunchHandlerService launch handler services}.
+ */
 public final class LaunchHandlers {
     private static final String SIDE_SYSTEM_PROPERTY = "fabric.side";
     private static final String CLIENT_SIDE = "client";
     private static final String SERVER_SIDE = "server";
 
+    /**
+     * Tries to determine the environment type from the ModLauncher environment.
+     *
+     * <p>Specifically, it checks these in order:
+     * <ol>
+     *     <li>system property {@value #SIDE_SYSTEM_PROPERTY}, either {@value #CLIENT_SIDE} or {@value #SERVER_SIDE}
+     *     <li>if the launch handler is a {@link SpindleLaunchHandler}, its {@linkplain SpindleLaunchHandler#side() side}
+     *     <li>the distribution of FML launch handlers
+     *     <li>{@code client} or {@code server} in the launch target name (case-insensitive)
+     * </ol>
+     *
+     * <p>If the environment type cannot be detected, this method fails.
+     *
+     * @param environment the system environment
+     * @return the determined environment type
+     */
     public static EnvType determineEnvType(IEnvironment environment) {
         String side = System.getProperty(SIDE_SYSTEM_PROPERTY);
         if (side != null) return parseEnv(side);
