@@ -21,6 +21,7 @@ class ModuleNamesTest {
     private static final String NUMBER_IN_ID_MIDDLE = "tiny-carrot-1-test";
     private static final String NUMBER_IN_ID_UNDERSCORE = "tiny-carrot-_1";
     private static final String ENDS_IN_DASH = "tiny-";
+    private static final String ENDS_IN_DASHES = "tiny--";
     private static final String CONSECUTIVE_DASHES = "tiny--carrot---or----potato";
     private static final String MIXED_DASHES_AND_UNDERSCORES = "tiny-_-carrot-_-_-_or-_-_-_-__potato";
     private static final List<String> ALL_IDS = List.of(
@@ -30,6 +31,7 @@ class ModuleNamesTest {
         NUMBER_IN_ID_MIDDLE,
         NUMBER_IN_ID_UNDERSCORE,
         ENDS_IN_DASH,
+        ENDS_IN_DASHES,
         CONSECUTIVE_DASHES,
         MIXED_DASHES_AND_UNDERSCORES
     );
@@ -40,6 +42,8 @@ class ModuleNamesTest {
             .isNotEqualTo(ModuleNames.fromModId(SIMPLE_UNDERSCORE));
         assertThat(ModuleNames.fromModId(NUMBER_IN_ID))
             .isNotEqualTo(ModuleNames.fromModId(NUMBER_IN_ID_UNDERSCORE));
+        assertThat(ModuleNames.fromModId(ENDS_IN_DASH))
+            .isNotEqualTo(ModuleNames.fromModId(ENDS_IN_DASHES));
     }
 
     @Test
@@ -67,6 +71,8 @@ class ModuleNamesTest {
             .isEqualTo("tiny.carrot._1");
         assertThat(ModuleNames.fromModId(ENDS_IN_DASH))
             .isEqualTo("tiny.$");
+        assertThat(ModuleNames.fromModId(ENDS_IN_DASHES))
+            .isEqualTo("tiny.$.$");
         assertThat(ModuleNames.fromModId(CONSECUTIVE_DASHES))
             .isEqualTo("tiny.$.carrot.$.$.or.$.$.$.potato");
         assertThat(ModuleNames.fromModId(MIXED_DASHES_AND_UNDERSCORES))
