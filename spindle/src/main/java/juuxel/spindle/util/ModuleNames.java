@@ -22,22 +22,26 @@ public final class ModuleNames {
 
         while (start < id.length() && (dashIndex = id.indexOf('-', start)) >= 0) {
             String part = id.substring(start, dashIndex);
-
-            if (part.isEmpty()) {
-                joiner.add("$");
-            } else if (!Character.isJavaIdentifierStart(part.charAt(0))) {
-                joiner.add("$" + part);
-            } else {
-                joiner.add(part);
-            }
-
+            joiner.add(escape(part));
             start = dashIndex + 1;
         }
 
         if (start < id.length()) {
-            joiner.add(id.substring(start));
+            String part = id.substring(start);
+            joiner.add(escape(part));
         }
 
         return joiner.toString();
+    }
+
+    // Identifier character set = [a-z0-9-_]
+    private static String escape(String identifier) {
+        if (identifier.isEmpty()) {
+            return "$";
+        } else if (!Character.isJavaIdentifierStart(identifier.charAt(0))) {
+            return "$" + identifier;
+        } else {
+            return identifier;
+        }
     }
 }
