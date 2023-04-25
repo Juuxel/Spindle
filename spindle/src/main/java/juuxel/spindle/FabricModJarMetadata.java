@@ -9,10 +9,10 @@ package juuxel.spindle;
 import cpw.mods.jarhandling.JarMetadata;
 import cpw.mods.jarhandling.SecureJar;
 import juuxel.spindle.util.Logging;
+import juuxel.spindle.util.ModuleNames;
 import net.fabricmc.loader.api.ModContainer;
 
 import java.lang.module.ModuleDescriptor;
-import java.util.StringJoiner;
 
 final class FabricModJarMetadata implements JarMetadata {
     private final ModContainer modContainer;
@@ -30,29 +30,7 @@ final class FabricModJarMetadata implements JarMetadata {
         if (name != null) return name;
 
         String id = modContainer.getMetadata().getId();
-        StringJoiner joiner = new StringJoiner(".");
-        int start = 0;
-        int dashIndex;
-
-        while (start < id.length() && (dashIndex = id.indexOf('-', start)) >= 0) {
-            String part = id.substring(start, dashIndex);
-
-            if (part.isEmpty()) {
-                joiner.add("$");
-            } else if (!Character.isJavaIdentifierStart(part.charAt(0))) {
-                joiner.add("$" + part);
-            } else {
-                joiner.add(part);
-            }
-
-            start = dashIndex + 1;
-        }
-
-        if (start < id.length()) {
-            joiner.add(id.substring(start));
-        }
-
-        name = joiner.toString();
+        name = ModuleNames.fromModId(id);
         Logging.LOGGER.debug(Logging.MODULES, "Converted mod ID {} into module name {}", id, name);
         return name;
     }
