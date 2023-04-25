@@ -6,14 +6,20 @@
 
 package juuxel.spindle.test;
 
+import juuxel.spindle.test.util.SpindleGenerators;
 import juuxel.spindle.util.ModuleNames;
+import org.instancio.Instancio;
+import org.instancio.Select;
+import org.instancio.junit.InstancioExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.lang.model.SourceVersion;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(InstancioExtension.class)
 class ModuleNamesTest {
     private static final String SIMPLE_DASH = "tiny-potato";
     private static final String SIMPLE_UNDERSCORE = "tiny_potato";
@@ -50,11 +56,13 @@ class ModuleNamesTest {
     void validIdentifier() {
         assertThat(ALL_IDS)
             .map(ModuleNames::fromModId)
-            .allSatisfy(name -> {
-                var parts = name.split("\\.");
-                assertThat(parts)
-                    .allMatch(SourceVersion::isIdentifier, "is valid java identifier");
-            });
+            .allSatisfy(ModuleNamesTest::assertValidModuleName);
+    }
+
+    private static void assertValidModuleName(String name) {
+        var parts = name.split("\\.");
+        assertThat(parts)
+            .allMatch(SourceVersion::isIdentifier, "is valid java identifier");
     }
 
     @Test
@@ -77,5 +85,17 @@ class ModuleNamesTest {
             .isEqualTo("tiny.$.carrot.$.$.or.$.$.$.potato");
         assertThat(ModuleNames.fromModId(MIXED_DASHES_AND_UNDERSCORES))
             .isEqualTo("tiny._.carrot._._._or._._._.__potato");
+    }
+
+    @Test
+    void randomIds() {
+        List<String> ids = Instancio.ofList(String.class)
+            .size(20)
+            .generate(Select.all(String.class), SpindleGenerators.RANDOM_MOD_ID)
+            .create();
+
+        assertThat(ids)
+            .map(ModuleNames::fromModId)
+            .allSatisfy(ModuleNamesTest::assertValidModuleName);
     }
 }
