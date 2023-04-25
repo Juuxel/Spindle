@@ -26,10 +26,9 @@ public final class ModuleNames {
             start = dashIndex + 1;
         }
 
-        if (start < id.length()) {
-            String part = id.substring(start);
-            joiner.add(escape(part));
-        }
+        // Add the remaining part of the id.
+        String part = id.substring(start);
+        joiner.add(escape(part));
 
         return joiner.toString();
     }
